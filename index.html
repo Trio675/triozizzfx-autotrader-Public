@@ -507,6 +507,7 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
           <div class="row" id="sideRow"><div class="l">Over / Under direction<small id="sideHelp">The engine only looks for this side, on every market.</small></div>
             <div class="r"><div class="seg" id="ouSide"><button data-s="over">Over</button><button data-s="under">Under</button><button data-s="both">Both</button></div></div></div>
           <div class="row"><div class="l">Over / Under barrier<small id="barHelp">Over 3 normally wins 60%, Under 3 normally 30%.</small></div><div class="r"><select id="barrier" style="width:74px"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div></div>
+          <div class="row" id="riskyRow"><div class="l">Allow Under 1–3 and Over 7–9<small id="riskyHelp">Off: the engine, auto bot and Top 3 autopick never take these, even when they are the best signal. They win only 10–30% of the time.</small></div><div class="r"><label class="sw"><input type="checkbox" id="riskyOn"><i></i></label></div></div>
           <div class="row"><div class="l">Contract duration<small>Ticks per contract.</small></div><div class="r"><input type="number" id="ticks" min="1" max="10" step="1" style="width:74px"> ticks</div></div>
           <div class="row"><div class="l">Confidence level<small>Only signals at or above this are traded.</small></div><div class="r"><input type="range" id="conf" min="40" max="100" step="1"><b class="hi" id="confV" style="width:30px;text-align:right"></b></div></div>
           <div class="row"><div class="l">Patience<small>How many fresh-data checks a signal must hold before the engine commits.</small></div><div class="r"><select id="patience" style="width:150px"><option value="10">Standard (10)</option><option value="20">Patient (20)</option><option value="40">Very patient (40)</option></select></div></div>
@@ -596,7 +597,7 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
           <ol class="steps">
             <li><b>Press Connect</b> at the top of this app.</li>
             <li><b>Tap "Log in with Deriv"</b> and sign in on Deriv's page. You come straight back here, connected.</li>
-            <li>Prefer a token? Open <b>"Or use a Personal Access Token"</b> and paste a token with the <b>trade</b> scope. No app ID needed.</li>
+            <li>Prefer a token? Open <b>"Or use your API token and app ID"</b>, then paste the app ID and the Personal Access Token (with the <b>trade</b> scope) that you created together in the Deriv developer dashboard.</li>
             <li><b>Start on your demo account</b> and check a few trades against your Deriv statement before using real money.</li>
           </ol>
           <p class="disc">TRIOZIZZFX is a Deriv-registered app. On real-money trades Deriv includes a 3% app fee in its prices. Demo and paper trades have no fee.</p>
@@ -798,13 +799,13 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
     <button class="btn pri oauthbtn" id="cOauth" type="button"><span class="dlogo">D</span>Log in with Deriv</button>
     <button class="ghost oauthbtn2" id="cSignup" type="button">No account yet? Create a free Deriv account</button>
     <div class="row" style="margin-top:6px"><div class="l">Keep me logged in<small>Stays signed in on this device. Leave off on shared computers.</small></div><label class="sw"><input type="checkbox" id="saveDet"><i></i></label></div>
-    <details class="patbox" id="patBox"><summary>Or use a Personal Access Token</summary>
-      <p class="sub" style="margin:6px 0 0">Create a token with the <b>trade</b> scope in your Deriv account, then paste it here.</p>
-      <input type="hidden" id="appId">
+    <details class="patbox" id="patBox"><summary>Or use your API token and app ID</summary>
+      <p class="sub" style="margin:6px 0 0">Paste the <b>app ID</b> and the <b>Personal Access Token</b> created together in the Deriv developer dashboard. The token needs the <b>trade</b> scope.</p>
+      <label class="f" for="appId">App ID</label><input type="text" id="appId" autocomplete="off" placeholder="Your app ID">
       <label class="f" for="pat">Personal Access Token</label><input type="password" id="pat" autocomplete="off" placeholder="Paste your token">
       <div class="acts" style="margin-top:10px"><button class="btn pri" id="cGo">Connect with token</button></div>
     </details>
-    <p class="feenote">TRIOZIZZFX is a Deriv-registered app. On <b>real-money</b> trades, Deriv includes a <b>3% app fee</b> in its prices, which keeps this app free. Demo and paper trades have no fee. Prices and break-even rates shown here already include it.</p>
+    <p class="feenote">TRIOZIZZFX is a Deriv-registered app. When you log in with Deriv, <b>real-money</b> trades include a <b>3% app fee</b> in Deriv's prices, which keeps this app free. Demo and paper trades have no fee. With your own app ID, your own app's settings apply. Prices and break-even rates shown here already include any fee.</p>
     <div class="err" id="connErr"></div>
     <div class="acts"><a href="#" id="cHow" class="lnk" style="margin-right:auto;align-self:center">Help</a><button class="ghost" id="cCancel">Cancel</button></div>
   </div>
@@ -835,14 +836,14 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 /* ================= settings ================= */
 const SKEY="tz_at2_settings",DKEY="tz_at2_details",CKEY="tz_at2_cooldown",WKEY="tz_at2_welcomed";
 const S=Object.assign({baseStake:1,mgOn:true,mgMult:2,maxStake:8,maxRuns:5,maxLosses:3,tpMode:"usd",tpVal:5,slMode:"usd",slVal:"",
-  types:["OU"],ouSide:"over",barrier:3,plan:"martingale",dgLoss:"",dgTrades:"",ticks:1,conf:70,patience:20,win:1000,sound:true,notify:false},
+  types:["OU"],ouSide:"over",barrier:3,allowRisky:false,plan:"martingale",dgLoss:"",dgTrades:"",ticks:1,conf:70,patience:20,win:1000,sound:true,notify:false},
   (()=>{try{return JSON.parse(localStorage.getItem(SKEY)||"{}")}catch(e){return{}}})());
 const save=()=>{try{localStorage.setItem(SKEY,JSON.stringify(S))}catch(e){}};
 /* TRIOZIZZFX's registered Deriv app: every trade through this site uses it (3% markup set in the Deriv dashboard) */
 const TZ_APP_ID="34VbCtDEa50PGXxGDLNvP",TZ_REF={param:"t",token:"DN9QKS56RM4T"},AUTH_BASE="https://auth.deriv.com/oauth2",SESS_KEY="tz_at2_sess";
 let CRED={appId:TZ_APP_ID,pat:""};
 try{const d=JSON.parse(localStorage.getItem(DKEY)||sessionStorage.getItem(SESS_KEY)||"null");if(d){CRED=d;}}catch(e){}
-CRED.appId=TZ_APP_ID;
+if(!CRED.appId||CRED.mode==="oauth")CRED.appId=TZ_APP_ID;
 
 function loadUI(){
   ["baseStake","mgMult","maxStake","maxRuns","maxLosses","tpVal","slVal","ticks"].forEach(k=>$(k).value=S[k]);
@@ -861,7 +862,9 @@ function readUI(){
   S.barrier=+$("barrier").value;S.ticks=clamp(parseInt($("ticks").value)||1,1,10);S.conf=+$("conf").value;
   S.win=+$("win").value;S.patience=+$("patience").value;save();barHelp();refresh();
 }
-function barHelp(){const b=+$("barrier").value;$("barHelp").textContent=`Over ${b} normally wins ${(9-b)*10}%, Under ${b} normally ${b*10}%.`;
+function barHelp(){const b=+$("barrier").value;const off=[];if(riskyDigit("UNDER",b))off.push("Under "+b);if(riskyDigit("OVER",b))off.push("Over "+b);
+  $("barHelp").textContent=`Over ${b} normally wins ${(9-b)*10}%, Under ${b} normally ${b*10}%.`+(off.length&&!S.allowRisky?` ${off.join(" and ")} won't be traded unless you allow it below.`:"");
+  $("riskyOn").checked=!!S.allowRisky;$("riskyRow").style.display=S.types.includes("OU")?"":"none";
   $("ouSide").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.s===S.ouSide));
   $("sideRow").style.display=S.types.includes("OU")?"":"none";
   $("sideHelp").textContent=S.ouSide==="over"?`Scans every market for Over ${b} only (wins on ${b+1}–9). Never trades Under.`
@@ -951,6 +954,10 @@ function scoreCandle(m,side){
   const st=clamp(zf/4,0,1)*40,co=clamp(zr/2,0,1)*30,ag=tf/3*30;
   return {k,n,p0:.5,z:zf,st,co,ag,conf:Math.round(st+co+ag)};}
 const unsupported=new Set();
+/* Under 1-3 and Over 7-9 win rarely (10-30%). Blocked everywhere automatic unless the user switches them on. */
+function riskyDigit(ct,b){b=+b;const t=String(ct).toUpperCase();
+  return (/UNDER/.test(t)&&b>=1&&b<=3)||(/OVER/.test(t)&&b>=7&&b<=9)}
+const riskyOK=()=>!!S.allowRisky;
 function candidates(cfg){
   cfg=cfg||S;const out=[],b=cfg.barrier;
   Object.values(M).forEach(m=>{
@@ -975,7 +982,7 @@ function candidates(cfg){
   Object.values(best).forEach(g=>{g.sort((a,b)=>b.conf-a.conf||b.z-a.z);const [a,b]=g;
     if(b&&b.z>0&&a.conf-b.conf<10){a.ambiguous=true;b.ambiguous=true;}
     kept.push(a);});
-  return kept.filter(c=>!unsupported.has(c.key)&&!c.ambiguous).sort((a,b)=>b.conf-a.conf||b.z-a.z);
+  return kept.filter(c=>!unsupported.has(c.key)&&!c.ambiguous&&(riskyOK()||!riskyDigit(c.ct,c.barrier))).sort((a,b)=>b.conf-a.conf||b.z-a.z);
 }
 
 /* ================= account link ================= */
@@ -985,7 +992,7 @@ async function rest(path,method){
   let j=null;try{j=await r.json()}catch(e){}
   if(!r.ok){const m=j&&j.errors&&j.errors[0]?j.errors[0].message:("HTTP "+r.status);throw new Error(m)}
   return j;}
-function openConnect(){$("appId").value=TZ_APP_ID;$("pat").value=CRED.mode==="oauth"?"":(CRED.pat||"");$("saveDet").checked=!!localStorage.getItem(DKEY);
+function openConnect(){$("appId").value=CRED.mode==="pat"&&CRED.appId!==TZ_APP_ID?CRED.appId:"";$("pat").value=CRED.mode==="oauth"?"":(CRED.pat||"");$("saveDet").checked=!!localStorage.getItem(DKEY);
   $("connErr").textContent="";$("mConnect").classList.add("on");$("cOauth").focus();}
 function saveCred(){try{if($("saveDet").checked){localStorage.setItem(DKEY,JSON.stringify(CRED));sessionStorage.removeItem(SESS_KEY)}
   else{localStorage.removeItem(DKEY);sessionStorage.setItem(SESS_KEY,JSON.stringify(CRED))}}catch(e){}}
@@ -1031,8 +1038,8 @@ async function oauthCallback(){
   return true;
 }
 async function doConnect(fromSaved){
-  if(!fromSaved){CRED={appId:TZ_APP_ID,pat:$("pat").value.trim(),mode:"pat"};
-    if(!CRED.pat){$("connErr").textContent="Paste your token, or use Log in with Deriv.";return}
+  if(!fromSaved){CRED={appId:$("appId").value.trim(),pat:$("pat").value.trim(),mode:"pat"};
+    if(!CRED.appId||!CRED.pat){$("connErr").textContent="Enter both your app ID and your token, or use Log in with Deriv.";return}
     saveCred();}
   if(CRED.mode==="oauth"&&CRED.exp&&CRED.exp*1000<Date.now()+30000){if(!(await oauthRefresh())){openConnect();$("connErr").textContent="Your Deriv login expired. Log in again.";return}}
   oauthSchedule();
@@ -1215,6 +1222,8 @@ function buy(){
   if(L.ct==="DIGITOVER"||L.ct==="DIGITUNDER")p.barrier=String(L.barrier);
   if((L.ct==="DIGITUNDER"&&S.ouSide==="over")||(L.ct==="DIGITOVER"&&S.ouSide==="under")){
     log(`Blocked ${L.label}: you chose ${S.ouSide} only.`,"w");E.lock=null;resetPatience();return}
+  if(p.barrier!=null&&riskyDigit(L.ct,p.barrier)&&!riskyOK()){
+    log(`Blocked ${L.label}: Under 1–3 and Over 7–9 are off. Switch them on in the Engine settings if you want them.`,"w");E.lock=null;resetPatience();return}
   stake=stakeAdj(stake,m=>log(m,"w"));p.amount=stake;
   {const r=ruleCheck("Engine");if(r){stopEngine(r.short,r.msg,"rule");return}}
   {const g=guardCheck(stake);if(g){stopEngine("daily limit",g[0].toUpperCase()+g.slice(1)+".","daily");return}}
@@ -2053,6 +2062,7 @@ function abBuy(){
   {const g=guardCheck(stake);if(g)return abStop("daily limit: "+g,"e","daily")}
   const p={amount:stake,basis:"stake",contract_type:P.ct,currency:A.currency,duration:AS.ticks,duration_unit:"t",underlying_symbol:P.code};
   if(P.ct==="DIGITOVER"||P.ct==="DIGITUNDER")p.barrier=String(P.barrier);
+  if(p.barrier!=null&&riskyDigit(P.ct,p.barrier)&&!riskyOK()){return abStop(`${P.label} isn't allowed: Under 1–3 and Over 7–9 are off. Pick another market, or allow them in the Engine settings.`,"w","rule")}
   AB.pending={sentAt:now(),stake,params:p,cid:null,paper:isPaper()};
   setPhase("trading","Auto bot trading "+P.name,`${P.label} · stake ${money(stake)} · run ${AB.runs+1} of ${AS.maxRuns}`);
   abLog(`Sending ${P.label} on ${P.name}: ${P.ct}${p.barrier!=null?" barrier "+p.barrier:""}, ${money(stake)}.`);
@@ -2772,6 +2782,9 @@ const TZ_DEFS=[
     if(!c.st.plan){const P=top3Read();if(!P){c.vars.Status="Waiting for the Digit signals Top picks…";return null}
       c.st.plan=P;c.st.slot=0;c.st.k=0;c.st.cyc++;
       botLog(`Cycle ${c.st.cyc}: ${P.map((x,i)=>`${i+1}) ${botMarketName(x.code)} ${x.label}`).join(" → ")}.`,"y");top3View()}
+    while(c.st.plan&&!riskyOK()&&c.st.slot<3&&riskyDigit(c.st.plan[c.st.slot].t,c.st.plan[c.st.slot].d)){const R=c.st.plan[c.st.slot];
+      botLog(`Skipping pick ${c.st.slot+1} (${botMarketName(R.code)} ${R.label}): Under 1–3 and Over 7–9 are off. Switch them on in the Engine settings to allow them.`,"w");
+      c.st.k=0;c.st.slot++;if(c.st.slot>=3){c.st.plan=null;c.st.slot=0;c.st.doneCyc=c.st.cyc;top3View();c.vars.Status="Waiting for the next cycle's picks…";return null}}
     const L=c.st.plan[c.st.slot];c.market=L.code;c.st.key=L.code+"|"+L.t+(L.d!=null?L.d:"");
     const base=c.base;c.stake=c.st.stakes[c.st.key]!=null?c.st.stakes[c.st.key]:base;
     c.vars.Cycle=`${c.st.cyc}${+p.Cycles>0?" of "+p.Cycles:""}`;c.vars.Pick=`${c.st.slot+1} of 3: ${botMarketName(L.code)} ${L.label}`;c.vars["Trade on this pick"]=`${c.st.k+1} of ${p["Trades per market"]}`;
@@ -3845,6 +3858,13 @@ document.querySelectorAll(".seg[data-for]").forEach(sg=>sg.querySelectorAll("but
 $("hRange").querySelectorAll("button").forEach(b=>b.onclick=()=>{hHours=+b.dataset.h;$("hRange").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));renderHistory();});
 $("modeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>switchMode(b.dataset.mode));
 $("hAcct").querySelectorAll("button").forEach(b=>b.onclick=()=>{setHAcct(b.dataset.a);renderHistory();});
+$("riskyOn").onchange=async e=>{
+  if(e.target.checked){e.target.checked=false;
+    const ok=await confirmBox({title:"Allow Under 1–3 and Over 7–9?",danger:true,okText:"Allow them",check:"I understand these lose most of the time",
+      html:"<p>These contracts win only <b>10–30%</b> of the time. Even a strong signal loses often, and martingale on them can drain an account fast.</p><p>When allowed, the engine, the auto bot and Top 3 autopick may pick them whenever they rank best.</p>"});
+    if(!ok)return;S.allowRisky=true;log("Under 1–3 and Over 7–9 are now allowed.","w")}
+  else{S.allowRisky=false;log("Under 1–3 and Over 7–9 are blocked again.","g")}
+  e.target.checked=S.allowRisky;save();barHelp();refresh()};
 $("ouSide").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.ouSide=b.dataset.s;save();barHelp();
   if(E.lock&&!E.pending&&!candidates().some(x=>x.key===E.lock.key)){E.lock=null;resetPatience();}
   log(`Over/Under direction set to ${S.ouSide==="both"?"both sides":S.ouSide+" only"}.`);refresh();});
