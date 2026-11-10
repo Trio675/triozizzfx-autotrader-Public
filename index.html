@@ -1144,6 +1144,9 @@ function validate(){
   if(BOT.running||BOT.pending)return "An XML bot is running. Stop it before running the engine.";
   if(AB.running||AB.pending)return "The auto bot is running. Stop it before running the engine.";
   if(E.pending)return "Waiting for the open contract to settle…";
+  if(!S.allowRisky&&S.types.length===1&&S.types[0]==="OU"){const b=S.barrier,u=riskyDigit("UNDER",b),o=riskyDigit("OVER",b);
+    if((S.ouSide==="under"&&u)||(S.ouSide==="over"&&o)||(S.ouSide==="both"&&u&&o))
+      return `${S.ouSide==="over"?"Over "+b:"Under "+b} is blocked (Under 1–3 and Over 7–9 are off). Pick another barrier or side, or allow them in the settings.`;}
   const cd=isPaper()?0:cooldownLeft();if(cd>0)return `Cool-down after stop loss: ${fmtLeft(cd)} left. Take a break before trading again.`;
   if(!(S.slVal>0))return "Set a stop loss. The engine will not run without one.";
   if(S.slMode==="pct"&&S.slVal>100)return "Stop loss can't be more than 100%.";
