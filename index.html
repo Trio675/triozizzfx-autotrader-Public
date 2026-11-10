@@ -798,6 +798,7 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
     <p class="sub">Sign in on Deriv's own secure page. TRIOZIZZFX never sees your password.</p>
     <button class="btn pri oauthbtn" id="cOauth" type="button"><span class="dlogo">D</span>Log in with Deriv</button>
     <button class="ghost oauthbtn2" id="cSignup" type="button">No account yet? Create a free Deriv account</button>
+    <p class="feenote" style="margin-top:6px">Affiliate link: signing up through it costs you nothing extra, and TRIOZIZZFX may earn a commission from Deriv.</p>
     <div class="row" style="margin-top:6px"><div class="l">Keep me logged in<small>Stays signed in on this device. Leave off on shared computers.</small></div><label class="sw"><input type="checkbox" id="saveDet"><i></i></label></div>
     <details class="patbox" id="patBox"><summary>Or use your API token and app ID</summary>
       <p class="sub" style="margin:6px 0 0">Paste the <b>app ID</b> and the <b>Personal Access Token</b> created together in the Deriv developer dashboard. The token needs the <b>trade</b> scope.</p>
@@ -1000,6 +1001,7 @@ const b64url=u8=>btoa(String.fromCharCode(...u8)).replace(/\+/g,"-").replace(/\/
 const rnd64=n=>b64url(crypto.getRandomValues(new Uint8Array(n)));
 const redirectUri=()=>location.origin+location.pathname;
 async function oauthStart(signup){
+  if(signup&&!/^https?:/.test(location.protocol)){window.open("https://t.deriv.link?t="+TZ_REF.token,"_blank","noopener");return}
   if(!/^https?:/.test(location.protocol)){$("connErr").textContent="Log in with Deriv works on the website (for example your Netlify link), not on a downloaded file. Use a token here instead.";$("patBox").open=true;return}
   try{const state=rnd64(32),ver=rnd64(32),ch=b64url(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ver))));
     sessionStorage.setItem("tz_oauth_state",state);sessionStorage.setItem("tz_oauth_ver",ver);sessionStorage.setItem("tz_oauth_keep",$("saveDet").checked?"1":"");
