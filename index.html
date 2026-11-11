@@ -343,7 +343,7 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
 .dlogo{display:inline-flex;width:24px;height:24px;border-radius:7px;background:#ff444f;color:#fff;font-weight:900;align-items:center;justify-content:center;font-size:14px}
 .oauthbtn2{width:100%;margin-top:8px}.patbox{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}.patbox summary{cursor:pointer;font-weight:700;font-size:13.5px}
 .mplogo{display:inline-flex;width:24px;height:24px;border-radius:6px;background:#4caf50;color:#fff;font-weight:900;align-items:center;justify-content:center;font-size:14px;vertical-align:-3px;margin-right:4px}
-.mpform{max-width:420px}.mpform label.f{display:block;font-weight:600;margin:12px 0 6px}.mpform select,.mpform input{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:11px 12px;font-size:16px;color:inherit}.mpwarn{background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.4);color:var(--yellow);border-radius:10px;padding:8px 10px;font-size:13px;margin:6px 0}
+.mpform{max-width:440px}.mpseg{display:flex;margin-top:14px}.mpseg button{flex:1}.mpform label.f{display:block;font-weight:600;margin:12px 0 6px}.mpform select,.mpform input{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:11px 12px;font-size:16px;color:inherit}.mpwarn{background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.4);color:var(--yellow);border-radius:10px;padding:8px 10px;font-size:13px;margin:6px 0}
 .mpstat{margin-top:12px;border-radius:12px;padding:10px 12px;border:1px solid var(--line);font-size:14px;line-height:1.5}
 .mpstat.g{border-color:rgba(76,175,80,.6);background:rgba(76,175,80,.1)}.mpstat.e{border-color:rgba(255,68,79,.55);background:rgba(255,68,79,.08)}
 .mpstat.y,.mpstat.w{border-color:rgba(255,193,7,.5);background:rgba(255,193,7,.08)}
@@ -609,16 +609,25 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
         </div>
       </div>
       <div class="card" id="mpCard">
-        <h2><span class="mplogo">M</span> Pay with M-Pesa</h2>
-        <p class="sub">Pick a plan, enter your Safaricom number and tap Pay. An M-Pesa prompt pops up on your phone: enter your PIN to pay. Nothing is charged until you enter your PIN.</p>
-        <div id="mpSandbox" class="mpwarn hide">Test mode: Safaricom's sandbox, no real money moves.</div>
+        <h2>Subscribe to TRIOZIZZFX</h2>
+        <p class="sub">Pick a plan and how you want to pay. <b id="mpBonusTxt">Your first payment gets 5 extra days free.</b></p>
+        <div id="mpSandbox" class="mpwarn hide">Test mode: no real money moves.</div>
         <div class="mpform">
           <label class="f" for="mpPlan">Plan</label><select id="mpPlan"><option value="">Loading plans…</option></select>
-          <label class="f" for="mpPhone">M-Pesa number</label><input type="tel" id="mpPhone" inputmode="tel" autocomplete="tel" placeholder="0712 345 678" maxlength="16">
-          <button class="btn pri" id="mpPay" type="button" style="margin-top:12px;width:100%">Pay with M-Pesa</button>
+          <div class="seg mpseg" id="mpMethod"><button data-m="mpesa" class="on" type="button">M-Pesa</button><button data-m="pesapal" type="button">Airtel · Card · Bank</button></div>
+          <div id="mpBoxMpesa">
+            <label class="f" for="mpPhone">M-Pesa number</label><input type="tel" id="mpPhone" inputmode="tel" autocomplete="tel" placeholder="0712 345 678" maxlength="16">
+            <button class="btn pri" id="mpPay" type="button" style="margin-top:12px;width:100%"><span class="mplogo">M</span> Pay with M-Pesa</button>
+            <p class="disc">An M-Pesa prompt pops up on your phone. Enter your PIN there to pay. Nothing is charged until you do.</p>
+          </div>
+          <div id="mpBoxPp" class="hide">
+            <label class="f" for="ppEmail">Email or phone number</label><input type="text" id="ppEmail" autocomplete="email" placeholder="you@example.com or 0733 000 000" maxlength="120">
+            <button class="btn pri" id="ppPay" type="button" style="margin-top:12px;width:100%">Continue to secure payment</button>
+            <p class="disc">You'll go to Pesapal's secure page to pay with Airtel Money, Visa, Mastercard, bank or M-Pesa, then come back here.</p>
+          </div>
         </div>
         <div id="mpStatus" class="mpstat hide"></div>
-        <p class="disc">Payments go to TRIOZIZZFX's M-Pesa Till. Your M-Pesa PIN is entered only on your phone, never in this app. Keep your M-Pesa confirmation SMS as your receipt.</p>
+        <p class="disc">Prices are in Kenyan shillings (US dollar price shown for reference). Renewing adds the new days after your current plan ends. Keep your payment confirmation as your receipt.</p>
       </div>
       <div class="card">
         <h2>Rules</h2>
@@ -3733,46 +3742,81 @@ document.querySelectorAll("#botSub button").forEach(b=>b.onclick=()=>botSub(b.da
 $("sigSound").onchange=e=>{SIG.sound=e.target.checked;try{localStorage.setItem("tz_at2_sigsound",SIG.sound?"on":"off")}catch(_){}sigApplySound()};
 sigApplySound();
 
-/* ================= M-Pesa payments (STK Push via the site's Netlify functions) ================= */
-const MP={fn:"/.netlify/functions/",poll:null,busy:false};
+/* ================= Payments: M-Pesa (STK Push) + Pesapal, via the site's Netlify functions ================= */
+const MP={fn:"/.netlify/functions/",poll:null,busy:false,method:"mpesa",cfg:null};
 function mpShow(html,cls){const b=$("mpStatus");b.className="mpstat "+(cls||"");b.innerHTML=html;b.classList.remove("hide")}
+const mpKes=n=>"KES "+(+n).toLocaleString();
+function mpSetMethod(m){MP.method=m;$("mpMethod").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+  $("mpBoxMpesa").classList.toggle("hide",m!=="mpesa");$("mpBoxPp").classList.toggle("hide",m!=="pesapal");
+  const d=MP.cfg;if(d)$("mpSandbox").classList.toggle("hide",!(m==="mpesa"?d.mpesaSandbox:d.pesapalSandbox))}
 async function mpPlans(){
-  if(!/^https?:/.test(location.protocol)){$("mpPlan").innerHTML='<option value="">Available on the website</option>';$("mpPay").disabled=true;
-    mpShow("M-Pesa payments work on the TRIOZIZZFX website, not on a downloaded copy of this file.","w");return}
-  try{const r=await fetch(MP.fn+"plans",{cache:"no-store"});const d=await r.json();
-    $("mpPlan").innerHTML=d.plans.map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · KES ${(+p.amount).toLocaleString()}</option>`).join("");
-    $("mpSandbox").classList.toggle("hide",!d.sandbox);
-    if(!d.ready){$("mpPay").disabled=true;mpShow("M-Pesa payments are being set up. Check back soon.","w")}
-  }catch(e){$("mpPlan").innerHTML='<option value="">Not available yet</option>';$("mpPay").disabled=true;mpShow("M-Pesa payments aren't available right now.","w")}
+  if(!/^https?:/.test(location.protocol)){$("mpPlan").innerHTML='<option value="">Available on the website</option>';$("mpPay").disabled=$("ppPay").disabled=true;
+    mpShow("Payments work on the TRIOZIZZFX website, not on a downloaded copy of this file.","w");return}
+  try{const r=await fetch(MP.fn+"plans",{cache:"no-store"});const d=await r.json();MP.cfg=d;
+    const grp={binary:"Binary only",forex:"Forex only",both:"Binary + Forex"};
+    $("mpPlan").innerHTML=Object.entries(grp).map(([k,l])=>`<optgroup label="${l}">`+d.plans.filter(p=>p.scope===k&&!p.test)
+      .map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · $${p.usd} (${mpKes(p.kes)})</option>`).join("")+"</optgroup>").join("")
+      +d.plans.filter(p=>p.test).map(p=>`<option value="${esc(p.id)}">Test payment · ${mpKes(p.kes)}</option>`).join("");
+    if(d.bonusDays)$("mpBonusTxt").textContent=`Your first payment gets ${d.bonusDays} extra days free.`;
+    $("mpPay").disabled=!d.mpesa;$("ppPay").disabled=!d.pesapal;
+    $("mpMethod").querySelector('[data-m="pesapal"]').classList.toggle("hide",!d.pesapal);
+    if(!d.mpesa&&d.pesapal)mpSetMethod("pesapal");else mpSetMethod(MP.method);
+    if(!d.mpesa&&!d.pesapal)mpShow("Payments are being set up. Check back soon.","w");
+  }catch(e){$("mpPlan").innerHTML='<option value="">Not available yet</option>';$("mpPay").disabled=$("ppPay").disabled=true;mpShow("Payments aren't available right now.","w")}
 }
 function mpNorm(p){const d=String(p||"").replace(/[^\d]/g,"");const m=d.match(/^(?:254|0)?([17]\d{8})$/);return m?"254"+m[1]:null}
+const mpAcct=()=>(A.acct&&A.acct.account_id)||"";
+function mpBusy(on){MP.busy=on;$("mpPay").disabled=on||!(MP.cfg&&MP.cfg.mpesa);$("ppPay").disabled=on||!(MP.cfg&&MP.cfg.pesapal)}
 async function mpPay(){
   if(MP.busy)return;const phone=mpNorm($("mpPhone").value),plan=$("mpPlan").value;
   if(!plan)return mpShow("Pick a plan first.","e");
   if(!phone)return mpShow("Enter your Safaricom number, like 0712345678.","e");
-  MP.busy=true;$("mpPay").disabled=true;mpShow("Sending the M-Pesa prompt to your phone…","");
-  try{const r=await fetch(MP.fn+"stk-push",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({phone,plan,account:(A.acct&&A.acct.account_id)||""})});
+  mpBusy(true);mpShow("Sending the M-Pesa prompt to your phone…","");
+  try{const r=await fetch(MP.fn+"stk-push",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone,plan,account:mpAcct()})});
     const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
     if(!r.ok||!d.ok)throw new Error(d.error||"Couldn't send the prompt.");
-    mpShow(`<b>Check your phone.</b> Enter your M-Pesa PIN to pay KES ${(+d.amount).toLocaleString()} for ${esc(d.plan)}.<br><small>Waiting for M-Pesa to confirm…</small>`,"y");
-    mpWatch(d.id,Date.now());
-  }catch(e){mpShow(esc(e.message),"e");MP.busy=false;$("mpPay").disabled=false}
+    mpShow(`<b>Check your phone.</b> Enter your M-Pesa PIN to pay ${mpKes(d.amount)} for ${esc(d.plan)}.<br><small>Waiting for M-Pesa to confirm…</small>`,"y");
+    mpWatch(d.id,Date.now(),120000);
+  }catch(e){mpShow(esc(e.message),"e");mpBusy(false)}
 }
-function mpWatch(id,t0){clearTimeout(MP.poll);
+async function ppPay(){
+  if(MP.busy)return;const plan=$("mpPlan").value,v=$("ppEmail").value.trim();
+  if(!plan)return mpShow("Pick a plan first.","e");
+  const email=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?v:"",phone=email?"":v.replace(/[^\d+]/g,"");
+  if(!email&&phone.length<9)return mpShow("Enter your email address or phone number.","e");
+  mpBusy(true);mpShow("Opening Pesapal's secure payment page…","");
+  try{const r=await fetch(MP.fn+"pesapal-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan,email,phone,account:mpAcct()})});
+    const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
+    if(!r.ok||!d.ok||!/^https:\/\/[\w.-]*pesapal\.com\//.test(d.redirect))throw new Error(d.error||"Couldn't start the payment.");
+    try{sessionStorage.setItem("tz_pp_pending",d.id);sessionStorage.setItem(WKEY,"1")}catch(e){}
+    location.href=d.redirect;
+  }catch(e){mpShow(esc(e.message),"e");mpBusy(false)}
+}
+function mpWatch(id,t0,limit){clearTimeout(MP.poll);
   MP.poll=setTimeout(async()=>{let d=null;try{const r=await fetch(MP.fn+"pay-status?id="+encodeURIComponent(id),{cache:"no-store"});d=await r.json()}catch(e){}
-    const done=()=>{MP.busy=false;$("mpPay").disabled=false};
-    if(d&&d.status==="paid"){done();
-      mpShow(`<b>Payment received. Thank you!</b><br>M-Pesa receipt: <b>${esc(d.receipt||"—")}</b>${d.expires?`<br>Your ${esc(d.plan)} plan runs until ${new Date(d.expires).toLocaleString()}.`:""}`,"g");
+    if(d&&d.status==="paid"){mpBusy(false);
+      mpShow(`<b>Payment received. Thank you!</b><br>Receipt: <b>${esc(d.receipt||"—")}</b>${d.bonus?`<br>Includes your ${d.bonus} free bonus days.`:""}${d.expires?`<br>Your ${esc(d.plan)} plan runs until ${new Date(d.expires).toLocaleString()}.`:""}`,"g");
       try{localStorage.setItem("tz_mp_last",JSON.stringify({receipt:d.receipt,plan:d.plan,expires:d.expires}))}catch(e){}
-      log("M-Pesa payment received: "+(d.receipt||"")+".","g");return}
-    if(d&&(d.status==="cancelled"||d.status==="failed")){done();
+      log("Payment received: "+(d.receipt||d.plan||"")+".","g");return}
+    if(d&&(d.status==="cancelled"||d.status==="failed")){mpBusy(false);
       mpShow(`${d.status==="cancelled"?"You cancelled the payment.":"The payment didn't go through."} <small>${esc(d.desc||"")}</small><br>Nothing was charged. You can try again.`,"e");return}
-    if(Date.now()-t0>120000){done();mpShow("No answer from M-Pesa yet. If you paid, keep your confirmation SMS and contact TRIOZIZZFX support with the receipt code.","w");return}
-    mpWatch(id,t0)},3000)}
-$("mpPay").onclick=mpPay;
+    if(Date.now()-t0>limit){mpBusy(false);mpShow("No confirmation yet. If you paid, keep your payment confirmation and contact TRIOZIZZFX support with it.","w");return}
+    mpWatch(id,t0,limit)},3000)}
+/* back from Pesapal: ?pay=pesapal&OrderTrackingId=… */
+function ppReturn(){
+  const u=new URL(location.href),id=u.searchParams.get("OrderTrackingId");
+  if(u.searchParams.get("pay")!=="pesapal"||!id)return;
+  history.replaceState(null,"",location.origin+location.pathname);
+  try{sessionStorage.removeItem("tz_pp_pending")}catch(e){}
+  if(!/^[\w-]{6,80}$/.test(id))return;
+  $("welcome").classList.add("hide");showTab("account");setTimeout(()=>$("mpCard").scrollIntoView({block:"start"}),200);
+  mpBusy(true);mpShow("Checking your payment with Pesapal…","y");mpWatch(id,Date.now(),180000);
+}
+$("mpPay").onclick=mpPay;$("ppPay").onclick=ppPay;
+$("mpMethod").querySelectorAll("button").forEach(b=>b.onclick=()=>mpSetMethod(b.dataset.m));
 $("mpPhone").addEventListener("keydown",e=>{if(e.key==="Enter")mpPay()});
-mpPlans();
+$("ppEmail").addEventListener("keydown",e=>{if(e.key==="Enter")ppPay()});
+mpPlans().then(ppReturn);
 
 /* ================= rendering ================= */
 function refresh(){
