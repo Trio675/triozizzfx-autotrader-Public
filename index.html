@@ -347,6 +347,11 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
 .mpstat{margin-top:12px;border-radius:12px;padding:10px 12px;border:1px solid var(--line);font-size:14px;line-height:1.5}
 .mpstat.g{border-color:rgba(76,175,80,.6);background:rgba(76,175,80,.1)}.mpstat.e{border-color:rgba(255,68,79,.55);background:rgba(255,68,79,.08)}
 .mpstat.y,.mpstat.w{border-color:rgba(255,193,7,.5);background:rgba(255,193,7,.08)}
+.tab.locked>*:not(.pwall),#botsSig.locked>*:not(.pwall),#botsTop3.locked>*:not(.pwall){display:none!important}
+.pwall{border-color:rgba(255,193,7,.45);display:none}.locked>.pwall{display:block}
+.admrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0;flex-wrap:wrap}
+.admtbl{overflow-x:auto}.admtbl table{width:100%;border-collapse:collapse;font-size:13px}.admtbl th,.admtbl td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.mpform input[type=email],.mpform input[type=number]{width:100%}
 .feenote{font-size:12px;color:var(--mut);margin:12px 0 0;line-height:1.5}
 .tag.tz{background:linear-gradient(90deg,var(--yellow),var(--orange));color:#241a00;font-weight:800}
 .tzhow{margin:6px 0 2px;padding-left:18px}.tzhow li{margin:3px 0}.alnew input,.alnew select{width:100%}
@@ -405,6 +410,7 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
     <button data-t="ins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Insights<span class="newtag">NEW</span></button>
     <button data-t="rules"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Risk rules<span class="newtag">NEW</span></button>
     <button data-t="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>Open an account</button>
+    <button data-t="admin" id="navAdmin" class="hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Admin</button>
   </nav>
   <div class="sidefoot">
     <div class="today" id="todayCard"></div>
@@ -523,6 +529,26 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
     </div>
 
     <!-- SIGNALS -->
+    <div class="tab hide" id="t-admin">
+      <div class="card"><h2>Admin</h2><p class="sub">Only your admin email can see this page. You have full access to everything.</p>
+        <dl id="admStats" class="kv" style="margin:8px 0"></dl><div id="admMsg" class="mpstat hide"></div>
+        <div class="acts" style="justify-content:flex-start"><button class="ghost" id="admReload" type="button">Refresh</button></div></div>
+      <div class="card"><h2>PayPal payments to check</h2><p class="sub">Check each one in your PayPal account first, then approve it. Approving emails the person their access code.</p><div id="admReview"></div></div>
+      <div class="grid2">
+        <div class="card mpform"><h2>Give free access</h2>
+          <label class="f" for="admGEmail">Email</label><input type="email" id="admGEmail" placeholder="friend@example.com">
+          <label class="f" for="admGDays">Days</label><input type="number" id="admGDays" min="1" max="3650" value="7">
+          <label class="f" for="admGScope">Access</label><select id="admGScope"><option value="both">Binary + Forex</option><option value="binary">Binary only</option><option value="forex">Forex only</option></select>
+          <div class="row" style="margin-top:8px"><div class="l">Email them an access code</div><label class="sw"><input type="checkbox" id="admGSend" checked><i></i></label></div>
+          <button class="btn pri" id="admGrant" type="button" style="width:100%;margin-top:10px">Give access</button></div>
+        <div class="card mpform"><h2>Send an access code</h2><p class="sub">For someone who paid but lost their code or changed phones.</p>
+          <label class="f" for="admCEmail">Email</label><input type="email" id="admCEmail" placeholder="client@example.com">
+          <button class="btn pri" id="admCode" type="button" style="width:100%;margin-top:10px">Send code</button></div>
+      </div>
+      <div class="card"><h2>Recent payments</h2><div id="admRecent" class="admtbl"></div></div>
+      <div class="card"><h2>Free access given</h2><div id="admGrants" class="admtbl"></div></div>
+    </div>
+
     <div class="tab hide" id="t-signals">
       <div class="card">
         <h2>All signals</h2>
@@ -608,26 +634,53 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
           <p class="disc">TRIOZIZZFX is a Deriv-registered app. On real-money trades Deriv includes a 3% app fee in its prices. Demo and paper trades have no fee.</p>
         </div>
       </div>
+      <div class="card" id="accCard">
+        <h2>My access</h2>
+        <div id="accState" class="mpstat"></div>
+        <div id="accLocked" class="mpform">
+          <p class="sub" style="margin-top:10px">Already paid? Enter the email you paid with. We'll email you a 6-digit code that unlocks this device.</p>
+          <label class="f" for="accEmail">Email</label><input type="email" id="accEmail" autocomplete="email" placeholder="you@example.com" maxlength="120">
+          <button class="ghost" id="accSend" type="button" style="width:100%;margin-top:10px">Send me a code</button>
+          <label class="f" for="accCode">6-digit code</label><input type="text" id="accCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+          <button class="btn pri" id="accUnlock" type="button" style="width:100%;margin-top:10px">Unlock this device</button>
+          <details class="patbox" style="margin-top:12px"><summary>I have a tester code</summary>
+            <p class="sub" style="margin:6px 0 0">Testers get 7 days free, once per email. Uses the email above.</p>
+            <label class="f" for="accTester">Tester code</label><input type="text" id="accTester" autocomplete="off" maxlength="40">
+            <button class="btn pri" id="accTry" type="button" style="width:100%;margin-top:10px">Start my free days</button></details>
+        </div>
+        <div id="accIn" class="hide" style="margin-top:10px"><button class="ghost" id="accOut" type="button">Sign this device out</button></div>
+        <div id="accMsg" class="mpstat hide"></div>
+        <p class="disc">One device at a time: unlocking a new device signs out the old one. Free without a plan: the <b>Six Step Cycle</b> bot on demo or paper.</p>
+      </div>
       <div class="card" id="mpCard">
         <h2>Subscribe to TRIOZIZZFX</h2>
         <p class="sub">Pick a plan and how you want to pay. <b id="mpBonusTxt">Your first payment gets 5 extra days free.</b></p>
         <div id="mpSandbox" class="mpwarn hide">Test mode: no real money moves.</div>
         <div class="mpform">
           <label class="f" for="mpPlan">Plan</label><select id="mpPlan"><option value="">Loading plans…</option></select>
-          <div class="seg mpseg" id="mpMethod"><button data-m="mpesa" class="on" type="button">M-Pesa</button><button data-m="pesapal" type="button">Airtel · Card · Bank</button></div>
+          <label class="f" for="payEmail">Your email <small class="mut">(your access code is sent here)</small></label><input type="email" id="payEmail" autocomplete="email" placeholder="you@example.com" maxlength="120">
+          <div class="seg mpseg" id="mpMethod"><button data-m="mpesa" class="on" type="button">M-Pesa</button><button data-m="pesapal" type="button">Airtel · Card · Bank</button><button data-m="paypal" type="button">PayPal</button></div>
           <div id="mpBoxMpesa">
             <label class="f" for="mpPhone">M-Pesa number</label><input type="tel" id="mpPhone" inputmode="tel" autocomplete="tel" placeholder="0712 345 678" maxlength="16">
             <button class="btn pri" id="mpPay" type="button" style="margin-top:12px;width:100%"><span class="mplogo">M</span> Pay with M-Pesa</button>
             <p class="disc">An M-Pesa prompt pops up on your phone. Enter your PIN there to pay. Nothing is charged until you do.</p>
           </div>
           <div id="mpBoxPp" class="hide">
-            <label class="f" for="ppEmail">Email or phone number</label><input type="text" id="ppEmail" autocomplete="email" placeholder="you@example.com or 0733 000 000" maxlength="120">
             <button class="btn pri" id="ppPay" type="button" style="margin-top:12px;width:100%">Continue to secure payment</button>
             <p class="disc">You'll go to Pesapal's secure page to pay with Airtel Money, Visa, Mastercard, bank or M-Pesa, then come back here.</p>
+          </div>
+          <div id="mpBoxPaypal" class="hide">
+            <p class="sub" id="ppalPrice" style="margin-top:12px"></p>
+            <a class="btn pri" id="ppalOpen" href="#" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:6px">Pay with PayPal</a>
+            <p class="disc">Or send it from your PayPal app to <b id="ppalTo"></b>.</p>
+            <label class="f" for="ppalTxn">PayPal transaction ID <small class="mut">(from your PayPal receipt)</small></label><input type="text" id="ppalTxn" autocomplete="off" maxlength="24" placeholder="e.g. 8AB12345CD678901E">
+            <button class="btn pri" id="ppalSubmit" type="button" style="margin-top:12px;width:100%">I've paid: send for approval</button>
+            <p class="disc">PayPal payments are checked by hand, usually within 24 hours. Your access code is emailed once it's approved.</p>
           </div>
         </div>
         <div id="mpStatus" class="mpstat hide"></div>
         <p class="disc">Prices are in Kenyan shillings (US dollar price shown for reference). Renewing adds the new days after your current plan ends. Keep your payment confirmation as your receipt.</p>
+        <p class="disc"><b>Payments are non-refundable.</b> Trading carries risk: you can lose money, and past results don't guarantee future results.</p>
       </div>
       <div class="card">
         <h2>Rules</h2>
@@ -3578,7 +3631,7 @@ function cpRender(auto){
     <dl class="kv" style="margin-top:6px"><dt>Status</dt><dd>${!unl?(has?"Locked: enter your PIN":"Set a PIN to start"):CP.on?`<span class="pos"><b>ON</b></span> · copying to ${onN} ${onN===1?"person":"people"}`:`<span class="neg"><b>OFF</b></span> · nothing is copied`}</dd>
     <dt>Your account</dt><dd>${A.acct?`${A.acct.account_id} · ${type==="real"?'<span class="neg"><b>Real</b></span>':"Demo"}`:"Not connected"}${isPaper()?' · <span class="neg">Paper mode is on, so nothing is copied</span>':""}</dd>
     <dt>People connected</dt><dd>${conn} of ${CP.items.length}</dd></dl>`;
-  const oc=$("cpOn");if(oc)oc.onchange=async e=>{if(e.target.checked){
+  const oc=$("cpOn");if(oc)oc.onchange=async e=>{if(e.target.checked&&!payOK("Copy trading")){e.target.checked=false;return}if(e.target.checked){
       const real=A.acct&&A.acct.account_type==="real";
       const ok=await confirmBox({title:"Turn copy trading ON?",okText:"Turn ON",check:real?"I understand this copies real-money trades to other people's accounts":null,
         html:`<p class="sub">Every real trade you place from this app will also be placed on ${onN} ${onN===1?"account":"accounts"}. If you lose, they lose. If you win, they win.</p><div class="warn${real?" real":""}">Trading is high risk. Only copy to people who understand and agree to that risk.</div>`});
@@ -3742,13 +3795,139 @@ document.querySelectorAll("#botSub button").forEach(b=>b.onclick=()=>botSub(b.da
 $("sigSound").onchange=e=>{SIG.sound=e.target.checked;try{localStorage.setItem("tz_at2_sigsound",SIG.sound?"on":"off")}catch(_){}sigApplySound()};
 sigApplySound();
 
+/* ================= Access: who has paid (one device per person, unlocked by an emailed code) ================= */
+const ACC_FN="/.netlify/functions/",ACCK="tz_acc",ACCT="tz_acc_tok",FREE_BOT="Six_Step_Cycle.xml";
+const ACC=Object.assign({email:null,admin:false,binaryUntil:null,forexUntil:null},ldJ(ACCK,{}));
+let ACC_TOK=(()=>{try{return localStorage.getItem(ACCT)||""}catch(e){return ""}})();
+const accUntil=s=>ACC.admin?Infinity:(t=>t?new Date(t).getTime():0)(s==="forex"?ACC.forexUntil:ACC.binaryUntil);
+const accHas=(s)=>!!ACC_TOK&&(ACC.admin||accUntil(s||"binary")>Date.now());
+const freeBotOK=bot=>!!bot&&bot.file===FREE_BOT&&(isPaper()||!!(A.acct&&A.acct.account_type!=="real"));
+function accSet(a,tok){
+  if(tok!==undefined){ACC_TOK=tok||"";try{tok?localStorage.setItem(ACCT,tok):localStorage.removeItem(ACCT)}catch(e){}}
+  Object.assign(ACC,{email:null,admin:false,binaryUntil:null,forexUntil:null},ACC_TOK?(a||{}):{});
+  try{localStorage.setItem(ACCK,JSON.stringify(ACC))}catch(e){}accRefresh()}
+async function accApi(body){
+  const r=await fetch(ACC_FN+"access",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
+  if(!r.ok||!d.ok){const e=new Error(d.error||"Something went wrong.");e.status=r.status;e.signedOut=!!d.signedOut;throw e}return d}
+async function accCheck(){
+  if(!ACC_TOK||!/^https?:/.test(location.protocol))return accRefresh();
+  try{const d=await accApi({action:"me",token:ACC_TOK});accSet(d.access)}
+  catch(e){if(e.signedOut){accSet(null,"");log("This device was signed out of TRIOZIZZFX: your access was unlocked on another device. Unlock it again under Account → My access.","w")}else accRefresh()}}
+const accDate=t=>new Date(t).toLocaleString([], {dateStyle:"medium",timeStyle:"short"});
+function accMsg(html,cls){const b=$("accMsg");b.className="mpstat "+(cls||"");b.innerHTML=html;b.classList.remove("hide")}
+function accRefresh(){
+  const on=!!ACC_TOK,bin=accHas("binary"),fx=accHas("forex"),st=$("accState");
+  if(st){
+    if(ACC.admin)st.innerHTML=`<b>Admin</b> · full access to everything<br><small>${esc(ACC.email||"")}</small>`;
+    else if(on&&(bin||fx))st.innerHTML=`<b>Unlocked</b> · ${esc(ACC.email||"")}<br>Binary: ${bin?"active until <b>"+accDate(ACC.binaryUntil)+"</b>":"not active"}<br>Forex: ${fx?"active until <b>"+accDate(ACC.forexUntil)+"</b>":"not active"}`;
+    else if(on)st.innerHTML=`<b>Plan ended</b> · ${esc(ACC.email||"")}<br>Renew below to keep trading. Free: Six Step Cycle on demo or paper.`;
+    else st.innerHTML="🔒 <b>Locked.</b> Pick a plan below, or unlock with your code if you've paid.<br><small>Free: the Six Step Cycle bot on demo or paper.</small>";
+    st.className="mpstat "+(ACC.admin||bin||fx?"g":on?"w":"");
+    $("accLocked").classList.toggle("hide",on&&(ACC.admin||bin||fx));$("accIn").classList.toggle("hide",!on);
+    if(ACC.email&&!$("accEmail").value)$("accEmail").value=ACC.email;}
+  const na=$("navAdmin");if(na)na.classList.toggle("hide",!(on&&ACC.admin));
+  try{if(!(on&&ACC.admin)&&curTab==="admin")showTab("account")}catch(e){}
+  payTab();accEnforce();
+}
+const PAY_AREAS={"t-signals":"The Signals page","t-markets":"The Markets page","t-lab":"The Strategy Lab","t-auto":"The Auto bot","t-copy":"Copy trading","botsSig":"Digit signals","botsTop3":"Top 3 autopick"};
+function payTab(){const lock=!accHas("binary");
+  Object.entries(PAY_AREAS).forEach(([id,what])=>{const el=$(id);if(!el)return;el.classList.toggle("locked",lock);
+    if(lock&&!el.querySelector(":scope>.pwall"))el.insertAdjacentHTML("afterbegin",`<div class="card pwall"><h2>🔒 ${what} is part of the paid plans</h2>
+      <p class="sub">Subscribe to unlock the engine, all bots, signals, markets, the Strategy Lab, the Auto bot and copy trading. Free without a plan: the <b>Six Step Cycle</b> bot on demo or paper.</p>
+      <div class="acts" style="justify-content:flex-start"><button class="btn pri" data-pw="mpCard" type="button">See plans</button><button class="ghost" data-pw="accCard" type="button">I already paid</button></div></div>`)})}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-pw]");if(b)payGo(b.dataset.pw)});
+function payGo(card){showTab("account");setTimeout(()=>{const el=$(card||"mpCard");if(el)el.scrollIntoView({block:"start",behavior:"smooth"})},150)}
+async function payPrompt(what){
+  const ok=await confirmBox({title:"This needs a TRIOZIZZFX plan",okText:"See plans",
+    html:`<p>${esc(what)} is part of the paid plans.</p><p class="sub">Free without a plan: the <b>Six Step Cycle</b> bot on demo or paper. Already paid? Unlock this device under <b>Account → My access</b>.</p>`});
+  if(ok)payGo(ACC_TOK?"mpCard":"accCard")}
+function payOK(what){if(accHas("binary"))return true;payPrompt(what);return false}
+/* gates: start points check the plan; Six Step Cycle stays free on demo/paper */
+{const f=askRun;askRun=async function(){if(!payOK("The trading engine"))return;return f.apply(this,arguments)}}
+{const f=startEngine;startEngine=function(){if(!accHas("binary")){payPrompt("The trading engine");return}return f.apply(this,arguments)}}
+{const f=askBotRun;askBotRun=async function(){if(!accHas("binary")&&!freeBotOK(BOT.sel)){payPrompt(BOT.sel&&BOT.sel.file===FREE_BOT?"Running Six Step Cycle on a real-money account":(BOT.sel?BOT.sel.name:"This bot"));return}return f.apply(this,arguments)}}
+{const f=startBot;startBot=function(){if(!accHas("binary")&&!freeBotOK(BOT.sel)){payPrompt(BOT.sel?BOT.sel.name:"This bot");return}return f.apply(this,arguments)}}
+{const f=abStart;abStart=function(){if(!payOK("The Auto bot"))return;return f.apply(this,arguments)}}
+{const f=abRunClick;abRunClick=function(){if(!payOK("The Auto bot"))return;return f.apply(this,arguments)}}
+{const f=rotStart;rotStart=async function(){if(!payOK("Bot rotation"))return;return f.apply(this,arguments)}}
+{const f=labGo;labGo=async function(){if(!payOK("The Strategy Lab"))return;return f.apply(this,arguments)}}
+{const f=labSweep;labSweep=async function(){if(!payOK("The Strategy Lab"))return;return f.apply(this,arguments)}}
+{const f=sigLoad;sigLoad=function(){if(!accHas("binary"))return;return f.apply(this,arguments)}}
+{const f=top3Enter;top3Enter=function(){if(!accHas("binary"))return;return f.apply(this,arguments)}}
+{const f=showTab;showTab=function(t){f.apply(this,arguments);payTab();if(t==="admin")admLoad()}}
+/* when a plan ends: no new trades */
+function accEnforce(){
+  if(accHas("binary"))return;let hit=false;
+  if(typeof E!=="undefined"&&E.running){stopEngine("plan ended","Your TRIOZIZZFX plan has ended. No new trades.","rule");hit=true}
+  if(typeof AB!=="undefined"&&AB.running){abStop("plan ended: no new trades","w","rule");hit=true}
+  if(typeof ROT!=="undefined"&&ROT.active){ROT.active=false;hit=true}
+  if(typeof BOT!=="undefined"&&BOT.running&&!freeBotOK(BOT.sel)){stopBot("plan ended");hit=true}
+  if(typeof CP!=="undefined"&&CP.on){CP.on=false;try{cpSave()}catch(e){}hit=true}
+  if(hit)log("Your TRIOZIZZFX plan has ended, so the app stopped placing new trades. Renew under Account.","w")}
+setInterval(accRefresh,15000);setInterval(accCheck,10*60000);
+/* My access card */
+async function accSend(){const email=$("accEmail").value.trim();if(!email)return accMsg("Enter the email you paid with.","e");
+  $("accSend").disabled=true;try{const d=await accApi({action:"sendcode",email});accMsg(esc(d.message),"y");$("accCode").focus()}
+  catch(e){accMsg(esc(e.message),"e")}setTimeout(()=>$("accSend").disabled=false,3000)}
+async function accUnlock(){const email=$("accEmail").value.trim(),code=$("accCode").value.replace(/\D/g,"");
+  if(!email||code.length!==6)return accMsg("Enter your email and the 6-digit code from the email.","e");
+  $("accUnlock").disabled=true;try{const d=await accApi({action:"redeem",email,code});accSet(d.access,d.token);$("accCode").value="";
+    accMsg(ACC.admin?"Welcome back. Admin access is on.":"<b>Unlocked.</b> This device can now use your plan.","g")}
+  catch(e){accMsg(esc(e.message),"e")}$("accUnlock").disabled=false}
+async function accTry(){const email=$("accEmail").value.trim(),code=$("accTester").value.trim();
+  if(!email||!code)return accMsg("Enter your email above and the tester code.","e");
+  $("accTry").disabled=true;try{const d=await accApi({action:"tester",email,code});accSet(d.access,d.token);$("accTester").value="";
+    accMsg(`<b>Free days started.</b> Full access until ${accDate(d.access.binaryUntil)}.`,"g")}
+  catch(e){accMsg(esc(e.message),"e")}$("accTry").disabled=false}
+async function accOut(){const ok=await confirmBox({title:"Sign this device out?",okText:"Sign out",html:"<p class='sub'>You can unlock it again any time with a new code sent to your email.</p>"});if(!ok)return;
+  const t=ACC_TOK;accSet(null,"");accMsg("This device is signed out.","");try{await accApi({action:"logout",token:t})}catch(e){}}
+$("accSend").onclick=accSend;$("accUnlock").onclick=accUnlock;$("accTry").onclick=accTry;$("accOut").onclick=accOut;
+$("accCode").addEventListener("keydown",e=>{if(e.key==="Enter")accUnlock()});
+/* Admin page */
+async function admApi(op,extra){
+  const r=await fetch(ACC_FN+"admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({token:ACC_TOK,op},extra||{}))});
+  const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));if(!r.ok||!d.ok)throw new Error(d.error||"Failed");return d}
+function admMsg(html,cls){const b=$("admMsg");b.className="mpstat "+(cls||"");b.innerHTML=html;b.classList.remove("hide")}
+const admWhen=t=>t?new Date(t).toLocaleString([], {dateStyle:"short",timeStyle:"short"}):"—";
+async function admLoad(){
+  if(!ACC.admin)return;$("admReview").innerHTML='<p class="mut">Loading…</p>';
+  try{const d=await admApi("list"),pn=id=>(d.plans[id]||{}).name||id;
+    $("admStats").innerHTML=`<dt>Paid (last 60)</dt><dd>${d.stats.paid}</dd><dt>Collected</dt><dd>KES ${(+d.stats.kes).toLocaleString()}${d.stats.usd?` · $${d.stats.usd}`:""}</dd><dt>Email</dt><dd>${d.mail?'<span class="pos">ready</span>':'<span class="neg">not set up: codes can\'t be emailed yet</span>'}</dd>`;
+    $("admReview").innerHTML=d.review.length?d.review.map(p=>`<div class="admrow"><div><b>$${esc(p.amount)}</b> · ${esc(pn(p.plan))}<br><small>${esc(p.payer)} · ID <b>${esc(p.receipt)}</b> · ${admWhen(p.created_at)}</small></div>
+      <div class="acts"><button class="btn pri" data-adm="approve" data-id="${esc(p.checkout_id)}" type="button">Approve</button><button class="ghost" data-adm="reject" data-id="${esc(p.checkout_id)}" type="button">Reject</button></div></div>`).join(""):'<p class="mut">Nothing to check.</p>';
+    $("admRecent").innerHTML='<table><tr><th>When</th><th>Who</th><th>Plan</th><th>Amount</th><th>How</th><th>Status</th><th>Until</th></tr>'+d.recent.map(p=>`<tr><td>${admWhen(p.created_at)}</td><td>${esc(p.payer||p.phone||"")}</td><td>${esc(pn(p.plan))}${p.bonus_days?` <small>+${p.bonus_days}d</small>`:""}</td><td>${esc(p.currency)} ${(+p.amount).toLocaleString()}</td><td>${esc(p.provider)}</td><td class="${p.status==="paid"?"pos":p.status==="pending"?"":"neg"}">${esc(p.status)}</td><td>${admWhen(p.expires_at)}</td></tr>`).join("")+"</table>";
+    $("admGrants").innerHTML=d.grants.length?'<table><tr><th>Given</th><th>Email</th><th>Access</th><th>Until</th><th>Note</th></tr>'+d.grants.map(g=>`<tr><td>${admWhen(g.created_at)}</td><td>${esc(g.email)}</td><td>${esc(g.scope)}</td><td>${admWhen(g.until)}</td><td>${esc(g.note||"")}</td></tr>`).join("")+"</table>":'<p class="mut">None yet.</p>';
+  }catch(e){$("admReview").innerHTML="";admMsg(esc(e.message),"e")}}
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-adm]");if(!b)return;const op=b.dataset.adm,id=b.dataset.id;
+  if(op==="approve"&&!(await confirmBox({title:"Approve this PayPal payment?",okText:"Approve",html:"<p class='sub'>Only approve after you've seen the money in your PayPal account. The person will be emailed their access code.</p>"})))return;
+  try{await admApi(op,{id});admMsg(op==="approve"?"Approved. Their access code was emailed.":"Rejected.","g");admLoad()}catch(err){admMsg(esc(err.message),"e")}});
+$("admReload").onclick=admLoad;
+$("admGrant").onclick=async()=>{try{const d=await admApi("grant",{email:$("admGEmail").value,days:+$("admGDays").value,scope:$("admGScope").value,sendCode:$("admGSend").checked,note:"admin"});
+  admMsg(`Access given until ${accDate(d.until)}.${$("admGSend").checked?(d.sent?" Code emailed.":" Email couldn't be sent: send a code once email is set up."):""}`,"g");admLoad()}catch(e){admMsg(esc(e.message),"e")}};
+$("admCode").onclick=async()=>{try{const d=await admApi("sendcode",{email:$("admCEmail").value});admMsg(d.sent?"Code emailed.":"Email isn't set up yet, so no code was sent.",d.sent?"g":"w")}catch(e){admMsg(esc(e.message),"e")}};
+
 /* ================= Payments: M-Pesa (STK Push) + Pesapal, via the site's Netlify functions ================= */
 const MP={fn:"/.netlify/functions/",poll:null,busy:false,method:"mpesa",cfg:null};
 function mpShow(html,cls){const b=$("mpStatus");b.className="mpstat "+(cls||"");b.innerHTML=html;b.classList.remove("hide")}
 const mpKes=n=>"KES "+(+n).toLocaleString();
 function mpSetMethod(m){MP.method=m;$("mpMethod").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
-  $("mpBoxMpesa").classList.toggle("hide",m!=="mpesa");$("mpBoxPp").classList.toggle("hide",m!=="pesapal");
-  const d=MP.cfg;if(d)$("mpSandbox").classList.toggle("hide",!(m==="mpesa"?d.mpesaSandbox:d.pesapalSandbox))}
+  $("mpBoxMpesa").classList.toggle("hide",m!=="mpesa");$("mpBoxPp").classList.toggle("hide",m!=="pesapal");$("mpBoxPaypal").classList.toggle("hide",m!=="paypal");
+  const d=MP.cfg;if(d)$("mpSandbox").classList.toggle("hide",!(m==="mpesa"?d.mpesaSandbox:m==="pesapal"?d.pesapalSandbox:false));ppalLink()}
+function ppalLink(){const d=MP.cfg,p=d&&d.plans.find(x=>x.id===$("mpPlan").value);if(!d||!p)return;
+  $("ppalPrice").innerHTML=p.usd?`Pay <b>$${p.usd}</b> for <b>${esc(p.name)}</b> in PayPal.`:"PayPal isn't used for the test payment.";
+  $("ppalTo").textContent=d.paypalEmail||"";
+  $("ppalOpen").href="https://www.paypal.com/cgi-bin/webscr?"+new URLSearchParams({cmd:"_xclick",business:d.paypalEmail||"",item_name:"TRIOZIZZFX "+p.name,amount:(+p.usd).toFixed(2),currency_code:"USD",no_shipping:"1"}).toString()}
+const payEmail=()=>{const v=$("payEmail").value.trim().toLowerCase();return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)?v:null};
+async function ppalSubmit(){
+  if(MP.busy)return;const plan=$("mpPlan").value,email=payEmail(),txn=$("ppalTxn").value.trim();
+  if(!plan)return mpShow("Pick a plan first.","e");if(!email)return mpShow("Enter your email first. Your access code is sent there.","e");
+  if(!/^[A-Za-z0-9]{10,24}$/.test(txn))return mpShow("Enter the PayPal transaction ID from your PayPal receipt.","e");
+  mpBusy(true);mpShow("Sending your PayPal payment for approval…","");
+  try{const r=await fetch(MP.fn+"paypal-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan,email,txn,account:mpAcct()})});
+    const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));if(!r.ok||!d.ok)throw new Error(d.error||"Couldn't send it.");
+    mpShow(`<b>Received.</b> ${esc(d.message)}<br><small>When the email arrives, enter the code under <b>My access</b>.</small>`,"g");$("ppalTxn").value="";
+  }catch(e){mpShow(esc(e.message),"e")}mpBusy(false)}
 async function mpPlans(){
   if(!/^https?:/.test(location.protocol)){$("mpPlan").innerHTML='<option value="">Available on the website</option>';$("mpPay").disabled=$("ppPay").disabled=true;
     mpShow("Payments work on the TRIOZIZZFX website, not on a downloaded copy of this file.","w");return}
@@ -3758,21 +3937,25 @@ async function mpPlans(){
       .map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · $${p.usd} (${mpKes(p.kes)})</option>`).join("")+"</optgroup>").join("")
       +d.plans.filter(p=>p.test).map(p=>`<option value="${esc(p.id)}">Test payment · ${mpKes(p.kes)}</option>`).join("");
     if(d.bonusDays)$("mpBonusTxt").textContent=`Your first payment gets ${d.bonusDays} extra days free.`;
-    $("mpPay").disabled=!d.mpesa;$("ppPay").disabled=!d.pesapal;
+    $("mpPay").disabled=!d.mpesa;$("ppPay").disabled=!d.pesapal;$("ppalSubmit").disabled=!d.paypal;
+    $("mpMethod").querySelector('[data-m="mpesa"]').classList.toggle("hide",!d.mpesa);
     $("mpMethod").querySelector('[data-m="pesapal"]').classList.toggle("hide",!d.pesapal);
-    if(!d.mpesa&&d.pesapal)mpSetMethod("pesapal");else mpSetMethod(MP.method);
-    if(!d.mpesa&&!d.pesapal)mpShow("Payments are being set up. Check back soon.","w");
+    $("mpMethod").querySelector('[data-m="paypal"]').classList.toggle("hide",!d.paypal);
+    mpSetMethod(d[MP.method]?MP.method:d.mpesa?"mpesa":d.pesapal?"pesapal":"paypal");
+    if(!$("payEmail").value&&ACC.email&&!ACC.admin)$("payEmail").value=ACC.email;
+    if(!d.mpesa&&!d.pesapal&&!d.paypal)mpShow("Payments are being set up. Check back soon.","w");
   }catch(e){$("mpPlan").innerHTML='<option value="">Not available yet</option>';$("mpPay").disabled=$("ppPay").disabled=true;mpShow("Payments aren't available right now.","w")}
 }
 function mpNorm(p){const d=String(p||"").replace(/[^\d]/g,"");const m=d.match(/^(?:254|0)?([17]\d{8})$/);return m?"254"+m[1]:null}
 const mpAcct=()=>(A.acct&&A.acct.account_id)||"";
-function mpBusy(on){MP.busy=on;$("mpPay").disabled=on||!(MP.cfg&&MP.cfg.mpesa);$("ppPay").disabled=on||!(MP.cfg&&MP.cfg.pesapal)}
+function mpBusy(on){MP.busy=on;$("mpPay").disabled=on||!(MP.cfg&&MP.cfg.mpesa);$("ppPay").disabled=on||!(MP.cfg&&MP.cfg.pesapal);$("ppalSubmit").disabled=on||!(MP.cfg&&MP.cfg.paypal)}
 async function mpPay(){
   if(MP.busy)return;const phone=mpNorm($("mpPhone").value),plan=$("mpPlan").value;
   if(!plan)return mpShow("Pick a plan first.","e");
+  const email=payEmail();if(!email)return mpShow("Enter your email first. Your access code is sent there.","e");
   if(!phone)return mpShow("Enter your Safaricom number, like 0712345678.","e");
   mpBusy(true);mpShow("Sending the M-Pesa prompt to your phone…","");
-  try{const r=await fetch(MP.fn+"stk-push",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone,plan,account:mpAcct()})});
+  try{const r=await fetch(MP.fn+"stk-push",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone,plan,email,account:mpAcct()})});
     const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
     if(!r.ok||!d.ok)throw new Error(d.error||"Couldn't send the prompt.");
     mpShow(`<b>Check your phone.</b> Enter your M-Pesa PIN to pay ${mpKes(d.amount)} for ${esc(d.plan)}.<br><small>Waiting for M-Pesa to confirm…</small>`,"y");
@@ -3780,10 +3963,9 @@ async function mpPay(){
   }catch(e){mpShow(esc(e.message),"e");mpBusy(false)}
 }
 async function ppPay(){
-  if(MP.busy)return;const plan=$("mpPlan").value,v=$("ppEmail").value.trim();
+  if(MP.busy)return;const plan=$("mpPlan").value,email=payEmail(),phone="";
   if(!plan)return mpShow("Pick a plan first.","e");
-  const email=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?v:"",phone=email?"":v.replace(/[^\d+]/g,"");
-  if(!email&&phone.length<9)return mpShow("Enter your email address or phone number.","e");
+  if(!email)return mpShow("Enter your email first. Your access code is sent there.","e");
   mpBusy(true);mpShow("Opening Pesapal's secure payment page…","");
   try{const r=await fetch(MP.fn+"pesapal-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan,email,phone,account:mpAcct()})});
     const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
@@ -3795,7 +3977,8 @@ async function ppPay(){
 function mpWatch(id,t0,limit){clearTimeout(MP.poll);
   MP.poll=setTimeout(async()=>{let d=null;try{const r=await fetch(MP.fn+"pay-status?id="+encodeURIComponent(id),{cache:"no-store"});d=await r.json()}catch(e){}
     if(d&&d.status==="paid"){mpBusy(false);
-      mpShow(`<b>Payment received. Thank you!</b><br>Receipt: <b>${esc(d.receipt||"—")}</b>${d.bonus?`<br>Includes your ${d.bonus} free bonus days.`:""}${d.expires?`<br>Your ${esc(d.plan)} plan runs until ${new Date(d.expires).toLocaleString()}.`:""}`,"g");
+      let unl="";if(d.claimable){try{const a=await accApi({action:"claim",id});accSet(a.access,a.token);unl="<br><b>This device is now unlocked.</b>"}catch(e){}}
+      mpShow(`<b>Payment received. Thank you!</b><br>Receipt: <b>${esc(d.receipt||"—")}</b>${d.bonus?`<br>Includes your ${d.bonus} free bonus days.`:""}${d.expires?`<br>Your ${esc(d.plan)} plan runs until ${new Date(d.expires).toLocaleString()}.`:""}${unl}${d.email?`<br><small>We also emailed an access code to ${esc(d.email)} for using another device.</small>`:""}`,"g");
       try{localStorage.setItem("tz_mp_last",JSON.stringify({receipt:d.receipt,plan:d.plan,expires:d.expires}))}catch(e){}
       log("Payment received: "+(d.receipt||d.plan||"")+".","g");return}
     if(d&&(d.status==="cancelled"||d.status==="failed")){mpBusy(false);
@@ -3812,11 +3995,10 @@ function ppReturn(){
   $("welcome").classList.add("hide");showTab("account");setTimeout(()=>$("mpCard").scrollIntoView({block:"start"}),200);
   mpBusy(true);mpShow("Checking your payment with Pesapal…","y");mpWatch(id,Date.now(),180000);
 }
-$("mpPay").onclick=mpPay;$("ppPay").onclick=ppPay;
+$("mpPay").onclick=mpPay;$("ppPay").onclick=ppPay;$("ppalSubmit").onclick=ppalSubmit;$("mpPlan").addEventListener("change",ppalLink);
 $("mpMethod").querySelectorAll("button").forEach(b=>b.onclick=()=>mpSetMethod(b.dataset.m));
 $("mpPhone").addEventListener("keydown",e=>{if(e.key==="Enter")mpPay()});
-$("ppEmail").addEventListener("keydown",e=>{if(e.key==="Enter")ppPay()});
-mpPlans().then(ppReturn);
+setTimeout(()=>{accRefresh();accCheck();mpPlans().then(ppReturn)},0);
 
 /* ================= rendering ================= */
 function refresh(){
@@ -3941,16 +4123,16 @@ async function askRun(){
 }
 
 /* ================= wiring ================= */
-const TITLES={engine:"Engine",signals:"Signals",history:"History & performance",bots:"XML bots",account:"Open an account",auto:"Auto bot loader",lab:"Strategy Lab",ins:"Insights",rules:"Risk rules",markets:"Markets",copy:"Copy trading"};
+const TITLES={admin:"Admin",engine:"Engine",signals:"Signals",history:"History & performance",bots:"XML bots",account:"Open an account",auto:"Auto bot loader",lab:"Strategy Lab",ins:"Insights",rules:"Risk rules",markets:"Markets",copy:"Copy trading"};
 function showTab(t){curTab=t;$("pageTitle").textContent=TITLES[t];
   document.querySelectorAll("nav.side button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
-  ["engine","signals","history","bots","account","auto","lab","ins","rules","markets","copy"].forEach(x=>$("t-"+x).classList.toggle("hide",x!==t));
+  ["engine","signals","history","bots","account","auto","lab","ins","rules","markets","copy","admin"].forEach(x=>$("t-"+x).classList.toggle("hide",x!==t));
   if(t==="bots"){renderBotList();renderBotPanel();}
   if(t==="auto")renderAuto();
   if(t==="lab")renderLabForm();
   if(t==="ins")renderInsights();
   if(t==="copy")cpRender();
-  if(t==="markets"){MK.built="";renderMarkets();if(MK.sel){renderMkDetail(true);mkSub()}}else if(MK.ch.req)mkUnsub();
+  if(t==="markets"&&accHas("binary")){MK.built="";renderMarkets();if(MK.sel){renderMkDetail(true);mkSub()}}else if(MK.ch.req)mkUnsub();
   if(t==="rules")renderRules();
   if(t==="bots")renderRot();
   $("side").classList.remove("open");if(t==="history")renderHistory();if(t==="signals")renderSignals();}

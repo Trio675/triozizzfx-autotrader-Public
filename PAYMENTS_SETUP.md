@@ -1,4 +1,4 @@
-# Payments setup (M-Pesa + Pesapal)
+# Payments and access setup (M-Pesa, Pesapal, PayPal, access codes)
 
 Backend: `netlify/functions/` + `netlify/lib/pay.mjs`. Plans and prices: `PLANS` in `netlify/lib/pay.mjs`
 (the browser can't change a price). First payment per phone/email gets +5 days; renewals add to the time left.
@@ -38,3 +38,25 @@ Pesapal (Airtel Money, cards, bank):
 
 A payment method only shows in the app once its variables are set.
 Functions only deploy when Netlify is linked to this GitHub repo (drag-and-drop doesn't deploy them).
+
+## 3. Access (who has paid)
+| Name | Value |
+|---|---|
+| ACCESS_SECRET | any long random text (keep it secret, never change it later) |
+| ADMIN_EMAIL | dennisombachi234@gmail.com (default) |
+| TESTER_CODE | the code you share with testers, e.g. TRIO7 |
+| TESTER_DAYS | 7 (default) |
+| PAYPAL_EMAIL | dennisombachi234@gmail.com (default) |
+
+## 4. Email (sends the 6-digit codes)
+Easiest without a domain: Gmail.
+1. Google Account -> Security -> turn on 2-Step Verification.
+2. Search "App passwords" -> create one named TRIOZIZZFX -> copy the 16 letters.
+3. Netlify: `GMAIL_USER` = your Gmail address, `GMAIL_APP_PASSWORD` = the 16 letters.
+(With your own domain later you can use Resend instead: `RESEND_API_KEY` + `EMAIL_FROM`.)
+
+## Who can use what
+- Free: Six Step Cycle bot on demo or paper.
+- Binary plan: everything in the app now. Forex plan: forex tools (coming).
+- One device per person: a code unlocks one device; using a code on a new device signs out the old one.
+- Admin (ADMIN_EMAIL): full access + Admin page (approve PayPal, give free days, resend codes).

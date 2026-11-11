@@ -83,7 +83,7 @@ export async function token(c) {
 }
 
 /* ---- Supabase REST (service key stays on the server) ---- */
-async function sb(c, path, opt = {}) {
+export async function sb(c, path, opt = {}) {
   const r = await fetch(c.sbUrl + "/rest/v1/" + path, { ...opt, headers: {
     apikey: c.sbKey, Authorization: "Bearer " + c.sbKey, "Content-Type": "application/json",
     Prefer: "return=representation", ...(opt.headers || {}) } });

@@ -1,5 +1,6 @@
 // Safaricom calls this with the payment result. Protected by the secret ?k= in the callback URL.
-import { cfg, json, dbGet, dbUpdate, finalize } from "../lib/pay.mjs";
+import { cfg, json, dbGet } from "../lib/pay.mjs";
+import { settle } from "../lib/access.mjs";
 
 export default async (req) => {
   const c = cfg(), k = new URL(req.url).searchParams.get("k");
@@ -11,8 +12,8 @@ export default async (req) => {
     const row = await dbGet(c, cb.CheckoutRequestID);
     if (row && row.status === "pending" && row.provider !== "pesapal") {
       const items = Object.fromEntries(((cb.CallbackMetadata && cb.CallbackMetadata.Item) || []).map(i => [i.Name, i.Value]));
-      await dbUpdate(c, cb.CheckoutRequestID, await finalize(c, row, { ok: +cb.ResultCode === 0, code: cb.ResultCode, desc: cb.ResultDesc,
-        receipt: items.MpesaReceiptNumber, paidAmount: items.Amount }));
+      await settle(c, cb.CheckoutRequestID, row, { ok: +cb.ResultCode === 0, code: cb.ResultCode, desc: cb.ResultDesc,
+        receipt: items.MpesaReceiptNumber, paidAmount: items.Amount });
     }
   } catch (e) { console.error("mpesa callback", e.message); }
   return json({ ResultCode: 0, ResultDesc: "Accepted" });

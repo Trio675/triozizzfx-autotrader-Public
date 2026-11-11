@@ -1,4 +1,5 @@
 // POST { phone, plan, account }  ->  sends the M-Pesa PIN prompt to the phone
+import { normEmail } from "../lib/access.mjs";
 import { planFor, cfg, missing, json, normPhone, timestamp, password, token, dbInsert, dbRecentForPhone } from "../lib/pay.mjs";
 
 export default async (req) => {
@@ -8,6 +9,8 @@ export default async (req) => {
   let b; try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
   const phone = normPhone(b.phone), plan = planFor(b.plan, !c.live);
   if (!phone) return json({ error: "Enter a Safaricom number like 0712345678." }, 400);
+  const email = normEmail(b.email);
+  if (!email) return json({ error: "Enter your email address. Your access code is sent there." }, 400);
   if (!plan) return json({ error: "Pick a plan." }, 400);
   const account = String(b.account || "").replace(/[^\w.-]/g, "").slice(0, 40);
 
@@ -29,7 +32,7 @@ export default async (req) => {
     const d = await r.json().catch(() => ({}));
     if (!r.ok || String(d.ResponseCode) !== "0")
       return json({ error: "M-Pesa didn't send the prompt: " + (d.errorMessage || d.ResponseDescription || d.CustomerMessage || r.status) }, 502);
-    await dbInsert(c, { provider: "mpesa", checkout_id: d.CheckoutRequestID, merchant_request_id: d.MerchantRequestID, phone, payer: phone,
+    await dbInsert(c, { provider: "mpesa", checkout_id: d.CheckoutRequestID, merchant_request_id: d.MerchantRequestID, phone, email, payer: email,
       amount: plan.kes, currency: "KES", plan: b.plan, scope: plan.scope, account: account || null, status: "pending" });
     return json({ ok: true, id: d.CheckoutRequestID, amount: plan.kes, plan: plan.name, sandbox: !c.live });
   } catch (e) { return json({ error: e.message }, 502); }

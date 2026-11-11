@@ -1,0 +1,9 @@
+{
+  "name": "triozizzfx-autotrader",
+  "private": true,
+  "type": "module",
+  "description": "TRIOZIZZFX Auto-Trader: static site + Netlify functions for payments and access",
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

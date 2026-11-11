@@ -26,3 +26,26 @@ create index if not exists payments_payer_idx on public.payments (payer, status)
 create index if not exists payments_account_idx on public.payments (account);
 -- Locked down: no public access. Only the Netlify functions (service key) can read or write.
 alter table public.payments enable row level security;
+
+-- Access: one-time email codes, devices (one per person), free grants (testers / admin gifts)
+alter table public.payments add column if not exists claimed_at timestamptz;
+create table if not exists public.access_codes (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  email text not null, code_hash text not null, expires_at timestamptz not null,
+  used_at timestamptz, attempts int not null default 0);
+create index if not exists access_codes_email_idx on public.access_codes (email, created_at desc);
+create table if not exists public.devices (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  token_hash text unique not null, email text not null, kind text,
+  last_seen timestamptz, revoked_at timestamptz);
+create index if not exists devices_email_idx on public.devices (email);
+create table if not exists public.grants (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  email text not null, scope text not null default 'both', until timestamptz not null, note text);
+create index if not exists grants_email_idx on public.grants (email);
+alter table public.access_codes enable row level security;
+alter table public.devices enable row level security;
+alter table public.grants enable row level security;
