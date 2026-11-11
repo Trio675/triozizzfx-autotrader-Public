@@ -13,3 +13,8 @@
   for = "/index.html"
   [headers.values]
     Cache-Control = "no-cache"
+
+# M-Pesa backend (Netlify Functions). Secrets go in Site configuration -> Environment variables.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

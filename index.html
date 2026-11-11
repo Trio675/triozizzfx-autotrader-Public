@@ -342,6 +342,11 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
 .oauthbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;font-size:15.5px;margin-top:8px}
 .dlogo{display:inline-flex;width:24px;height:24px;border-radius:7px;background:#ff444f;color:#fff;font-weight:900;align-items:center;justify-content:center;font-size:14px}
 .oauthbtn2{width:100%;margin-top:8px}.patbox{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}.patbox summary{cursor:pointer;font-weight:700;font-size:13.5px}
+.mplogo{display:inline-flex;width:24px;height:24px;border-radius:6px;background:#4caf50;color:#fff;font-weight:900;align-items:center;justify-content:center;font-size:14px;vertical-align:-3px;margin-right:4px}
+.mpform{max-width:420px}.mpform label.f{display:block;font-weight:600;margin:12px 0 6px}.mpform select,.mpform input{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:11px 12px;font-size:16px;color:inherit}.mpwarn{background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.4);color:var(--yellow);border-radius:10px;padding:8px 10px;font-size:13px;margin:6px 0}
+.mpstat{margin-top:12px;border-radius:12px;padding:10px 12px;border:1px solid var(--line);font-size:14px;line-height:1.5}
+.mpstat.g{border-color:rgba(76,175,80,.6);background:rgba(76,175,80,.1)}.mpstat.e{border-color:rgba(255,68,79,.55);background:rgba(255,68,79,.08)}
+.mpstat.y,.mpstat.w{border-color:rgba(255,193,7,.5);background:rgba(255,193,7,.08)}
 .feenote{font-size:12px;color:var(--mut);margin:12px 0 0;line-height:1.5}
 .tag.tz{background:linear-gradient(90deg,var(--yellow),var(--orange));color:#241a00;font-weight:800}
 .tzhow{margin:6px 0 2px;padding-left:18px}.tzhow li{margin:3px 0}.alnew input,.alnew select{width:100%}
@@ -602,6 +607,18 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
           </ol>
           <p class="disc">TRIOZIZZFX is a Deriv-registered app. On real-money trades Deriv includes a 3% app fee in its prices. Demo and paper trades have no fee.</p>
         </div>
+      </div>
+      <div class="card" id="mpCard">
+        <h2><span class="mplogo">M</span> Pay with M-Pesa</h2>
+        <p class="sub">Pick a plan, enter your Safaricom number and tap Pay. An M-Pesa prompt pops up on your phone: enter your PIN to pay. Nothing is charged until you enter your PIN.</p>
+        <div id="mpSandbox" class="mpwarn hide">Test mode: Safaricom's sandbox, no real money moves.</div>
+        <div class="mpform">
+          <label class="f" for="mpPlan">Plan</label><select id="mpPlan"><option value="">Loading plans…</option></select>
+          <label class="f" for="mpPhone">M-Pesa number</label><input type="tel" id="mpPhone" inputmode="tel" autocomplete="tel" placeholder="0712 345 678" maxlength="16">
+          <button class="btn pri" id="mpPay" type="button" style="margin-top:12px;width:100%">Pay with M-Pesa</button>
+        </div>
+        <div id="mpStatus" class="mpstat hide"></div>
+        <p class="disc">Payments go to TRIOZIZZFX's M-Pesa Till. Your M-Pesa PIN is entered only on your phone, never in this app. Keep your M-Pesa confirmation SMS as your receipt.</p>
       </div>
       <div class="card">
         <h2>Rules</h2>
@@ -3715,6 +3732,47 @@ function botSub(which){
 document.querySelectorAll("#botSub button").forEach(b=>b.onclick=()=>botSub(b.dataset.bs));
 $("sigSound").onchange=e=>{SIG.sound=e.target.checked;try{localStorage.setItem("tz_at2_sigsound",SIG.sound?"on":"off")}catch(_){}sigApplySound()};
 sigApplySound();
+
+/* ================= M-Pesa payments (STK Push via the site's Netlify functions) ================= */
+const MP={fn:"/.netlify/functions/",poll:null,busy:false};
+function mpShow(html,cls){const b=$("mpStatus");b.className="mpstat "+(cls||"");b.innerHTML=html;b.classList.remove("hide")}
+async function mpPlans(){
+  if(!/^https?:/.test(location.protocol)){$("mpPlan").innerHTML='<option value="">Available on the website</option>';$("mpPay").disabled=true;
+    mpShow("M-Pesa payments work on the TRIOZIZZFX website, not on a downloaded copy of this file.","w");return}
+  try{const r=await fetch(MP.fn+"plans",{cache:"no-store"});const d=await r.json();
+    $("mpPlan").innerHTML=d.plans.map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · KES ${(+p.amount).toLocaleString()}</option>`).join("");
+    $("mpSandbox").classList.toggle("hide",!d.sandbox);
+    if(!d.ready){$("mpPay").disabled=true;mpShow("M-Pesa payments are being set up. Check back soon.","w")}
+  }catch(e){$("mpPlan").innerHTML='<option value="">Not available yet</option>';$("mpPay").disabled=true;mpShow("M-Pesa payments aren't available right now.","w")}
+}
+function mpNorm(p){const d=String(p||"").replace(/[^\d]/g,"");const m=d.match(/^(?:254|0)?([17]\d{8})$/);return m?"254"+m[1]:null}
+async function mpPay(){
+  if(MP.busy)return;const phone=mpNorm($("mpPhone").value),plan=$("mpPlan").value;
+  if(!plan)return mpShow("Pick a plan first.","e");
+  if(!phone)return mpShow("Enter your Safaricom number, like 0712345678.","e");
+  MP.busy=true;$("mpPay").disabled=true;mpShow("Sending the M-Pesa prompt to your phone…","");
+  try{const r=await fetch(MP.fn+"stk-push",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({phone,plan,account:(A.acct&&A.acct.account_id)||""})});
+    const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
+    if(!r.ok||!d.ok)throw new Error(d.error||"Couldn't send the prompt.");
+    mpShow(`<b>Check your phone.</b> Enter your M-Pesa PIN to pay KES ${(+d.amount).toLocaleString()} for ${esc(d.plan)}.<br><small>Waiting for M-Pesa to confirm…</small>`,"y");
+    mpWatch(d.id,Date.now());
+  }catch(e){mpShow(esc(e.message),"e");MP.busy=false;$("mpPay").disabled=false}
+}
+function mpWatch(id,t0){clearTimeout(MP.poll);
+  MP.poll=setTimeout(async()=>{let d=null;try{const r=await fetch(MP.fn+"pay-status?id="+encodeURIComponent(id),{cache:"no-store"});d=await r.json()}catch(e){}
+    const done=()=>{MP.busy=false;$("mpPay").disabled=false};
+    if(d&&d.status==="paid"){done();
+      mpShow(`<b>Payment received. Thank you!</b><br>M-Pesa receipt: <b>${esc(d.receipt||"—")}</b>${d.expires?`<br>Your ${esc(d.plan)} plan runs until ${new Date(d.expires).toLocaleString()}.`:""}`,"g");
+      try{localStorage.setItem("tz_mp_last",JSON.stringify({receipt:d.receipt,plan:d.plan,expires:d.expires}))}catch(e){}
+      log("M-Pesa payment received: "+(d.receipt||"")+".","g");return}
+    if(d&&(d.status==="cancelled"||d.status==="failed")){done();
+      mpShow(`${d.status==="cancelled"?"You cancelled the payment.":"The payment didn't go through."} <small>${esc(d.desc||"")}</small><br>Nothing was charged. You can try again.`,"e");return}
+    if(Date.now()-t0>120000){done();mpShow("No answer from M-Pesa yet. If you paid, keep your confirmation SMS and contact TRIOZIZZFX support with the receipt code.","w");return}
+    mpWatch(id,t0)},3000)}
+$("mpPay").onclick=mpPay;
+$("mpPhone").addEventListener("keydown",e=>{if(e.key==="Enter")mpPay()});
+mpPlans();
 
 /* ================= rendering ================= */
 function refresh(){
