@@ -3796,7 +3796,7 @@ $("sigSound").onchange=e=>{SIG.sound=e.target.checked;try{localStorage.setItem("
 sigApplySound();
 
 /* ================= Access: who has paid (one device per person, unlocked by an emailed code) ================= */
-const ACC_FN="/.netlify/functions/",ACCK="tz_acc",ACCT="tz_acc_tok",FREE_BOT="Six_Step_Cycle.xml";
+const TZ_SITE="https://functional-website-dba168.netlify.app/",ON_WEB=/^https?:/.test(location.protocol),ACC_FN="/.netlify/functions/",ACCK="tz_acc",ACCT="tz_acc_tok",FREE_BOT="Six_Step_Cycle.xml";
 const ACC=Object.assign({email:null,admin:false,binaryUntil:null,forexUntil:null},ldJ(ACCK,{}));
 let ACC_TOK=(()=>{try{return localStorage.getItem(ACCT)||""}catch(e){return ""}})();
 const accUntil=s=>ACC.admin?Infinity:(t=>t?new Date(t).getTime():0)(s==="forex"?ACC.forexUntil:ACC.binaryUntil);
@@ -3807,8 +3807,10 @@ function accSet(a,tok){
   Object.assign(ACC,{email:null,admin:false,binaryUntil:null,forexUntil:null},ACC_TOK?(a||{}):{});
   try{localStorage.setItem(ACCK,JSON.stringify(ACC))}catch(e){}accRefresh()}
 async function accApi(body){
-  const r=await fetch(ACC_FN+"access",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-  const d=await r.json().catch(()=>({error:"Unexpected reply ("+r.status+")"}));
+  if(!ON_WEB)throw new Error("Unlocking works on the TRIOZIZZFX website, not on a downloaded copy of the app.");
+  let r;try{r=await fetch(ACC_FN+"access",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}
+  catch(e){throw new Error("Can't reach the TRIOZIZZFX server. Check your internet and try again.")}
+  const d=await r.json().catch(()=>({error:r.status===404?"Access isn't switched on on this website yet. Contact TRIOZIZZFX support.":"Unexpected reply ("+r.status+")"}));
   if(!r.ok||!d.ok){const e=new Error(d.error||"Something went wrong.");e.status=r.status;e.signedOut=!!d.signedOut;throw e}return d}
 async function accCheck(){
   if(!ACC_TOK||!/^https?:/.test(location.protocol))return accRefresh();
@@ -3825,7 +3827,8 @@ function accRefresh(){
     else st.innerHTML="🔒 <b>Locked.</b> Pick a plan below, or unlock with your code if you've paid.<br><small>Free: the Six Step Cycle bot on demo or paper.</small>";
     st.className="mpstat "+(ACC.admin||bin||fx?"g":on?"w":"");
     $("accLocked").classList.toggle("hide",on&&(ACC.admin||bin||fx));$("accIn").classList.toggle("hide",!on);
-    if(ACC.email&&!$("accEmail").value)$("accEmail").value=ACC.email;}
+    if(ACC.email&&!$("accEmail").value)$("accEmail").value=ACC.email;
+    if(!ON_WEB){$("accLocked").classList.add("hide");st.innerHTML=`🔒 <b>You're using a downloaded copy of the app.</b> Plans, payments and unlocking only work on the website.<br><a class="btn pri" href="${TZ_SITE}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px">Open the TRIOZIZZFX website</a><br><small>Free here: the Six Step Cycle bot on demo or paper.</small>`;st.className="mpstat w"}}
   const na=$("navAdmin");if(na)na.classList.toggle("hide",!(on&&ACC.admin));
   try{if(!(on&&ACC.admin)&&curTab==="admin")showTab("account")}catch(e){}
   payTab();accEnforce();
@@ -3835,7 +3838,7 @@ function payTab(){const lock=!accHas("binary");
   Object.entries(PAY_AREAS).forEach(([id,what])=>{const el=$(id);if(!el)return;el.classList.toggle("locked",lock);
     if(lock&&!el.querySelector(":scope>.pwall"))el.insertAdjacentHTML("afterbegin",`<div class="card pwall"><h2>🔒 ${what} is part of the paid plans</h2>
       <p class="sub">Subscribe to unlock the engine, all bots, signals, markets, the Strategy Lab, the Auto bot and copy trading. Free without a plan: the <b>Six Step Cycle</b> bot on demo or paper.</p>
-      <div class="acts" style="justify-content:flex-start"><button class="btn pri" data-pw="mpCard" type="button">See plans</button><button class="ghost" data-pw="accCard" type="button">I already paid</button></div></div>`)})}
+      <div class="acts" style="justify-content:flex-start">${ON_WEB?"":`<a class="btn pri" href="${TZ_SITE}" target="_blank" rel="noopener">Open the website</a>`}<button class="${ON_WEB?"btn pri":"ghost"}" data-pw="mpCard" type="button">See plans</button><button class="ghost" data-pw="accCard" type="button">I already paid</button></div></div>`)})}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-pw]");if(b)payGo(b.dataset.pw)});
 function payGo(card){showTab("account");setTimeout(()=>{const el=$(card||"mpCard");if(el)el.scrollIntoView({block:"start",behavior:"smooth"})},150)}
 async function payPrompt(what){
@@ -3929,8 +3932,8 @@ async function ppalSubmit(){
     mpShow(`<b>Received.</b> ${esc(d.message)}<br><small>When the email arrives, enter the code under <b>My access</b>.</small>`,"g");$("ppalTxn").value="";
   }catch(e){mpShow(esc(e.message),"e")}mpBusy(false)}
 async function mpPlans(){
-  if(!/^https?:/.test(location.protocol)){$("mpPlan").innerHTML='<option value="">Available on the website</option>';$("mpPay").disabled=$("ppPay").disabled=true;
-    mpShow("Payments work on the TRIOZIZZFX website, not on a downloaded copy of this file.","w");return}
+  if(!ON_WEB){document.querySelector("#mpCard .mpform").classList.add("hide");$("mpSandbox").classList.add("hide");
+    mpShow(`Plans and payments are on the TRIOZIZZFX website, not on a downloaded copy of the app.<br><a class="btn pri" href="${TZ_SITE}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px">Open the website to subscribe</a>`,"w");return}
   try{const r=await fetch(MP.fn+"plans",{cache:"no-store"});const d=await r.json();MP.cfg=d;
     const grp={binary:"Binary only",forex:"Forex only",both:"Binary + Forex"};
     $("mpPlan").innerHTML=Object.entries(grp).map(([k,l])=>`<optgroup label="${l}">`+d.plans.filter(p=>p.scope===k&&!p.test)
@@ -3944,7 +3947,7 @@ async function mpPlans(){
     mpSetMethod(d[MP.method]?MP.method:d.mpesa?"mpesa":d.pesapal?"pesapal":"paypal");
     if(!$("payEmail").value&&ACC.email&&!ACC.admin)$("payEmail").value=ACC.email;
     if(!d.mpesa&&!d.pesapal&&!d.paypal)mpShow("Payments are being set up. Check back soon.","w");
-  }catch(e){$("mpPlan").innerHTML='<option value="">Not available yet</option>';$("mpPay").disabled=$("ppPay").disabled=true;mpShow("Payments aren't available right now.","w")}
+  }catch(e){$("mpPlan").innerHTML='<option value="">Not available yet</option>';$("mpPay").disabled=$("ppPay").disabled=$("ppalSubmit").disabled=true;mpShow("Payments aren't available right now. Please try again later or contact TRIOZIZZFX support.","w")}
 }
 function mpNorm(p){const d=String(p||"").replace(/[^\d]/g,"");const m=d.match(/^(?:254|0)?([17]\d{8})$/);return m?"254"+m[1]:null}
 const mpAcct=()=>(A.acct&&A.acct.account_id)||"";
