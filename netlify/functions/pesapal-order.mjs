@@ -21,7 +21,7 @@ export default async (req) => {
     const site = c.site || new URL(req.url).origin, ref = "TZ-" + randomUUID().slice(0, 18);
     const d = await ppCall(c, "/Transactions/SubmitOrderRequest", {
       id: ref, currency: "KES", amount: plan.kes, description: ("TRIOZIZZFX " + plan.name).slice(0, 100),
-      callback_url: site + (cart ? "/home/?pay=pesapal" : "/?pay=pesapal"), notification_id: await ppIpn(c, site),
+      callback_url: site + (cart ? "/?pay=pesapal&shop=1" : "/?pay=pesapal"), notification_id: await ppIpn(c, site),
       billing_address: { email_address: email, phone_number: phone || undefined, country_code: "KE" } });
     if (!d.order_tracking_id || !d.redirect_url) return json({ error: "Pesapal didn't start the payment." }, 502);
     await dbInsert(c, { provider: "pesapal", checkout_id: d.order_tracking_id, merchant_request_id: ref, phone: phone || "", email,

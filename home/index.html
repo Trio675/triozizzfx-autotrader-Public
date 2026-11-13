@@ -26,7 +26,9 @@ header{position:sticky;top:0;z-index:20;background:rgba(11,16,32,.92);backdrop-f
 .pri{background:var(--acc);color:#fff}.pri:hover{background:var(--acc2)}.pri:disabled{opacity:.45;cursor:not-allowed}
 .ghost{background:transparent;color:var(--txt);border:1px solid var(--line2)}.ghost:hover{border-color:var(--acc)}
 .cartbtn{position:relative}.cartn{background:var(--yellow);color:#111;border-radius:99px;font-size:12px;padding:1px 7px;margin-left:2px}
-#menuBtn{display:none}
+#menuBtn{display:none}.links a{white-space:nowrap}
+.emb .nav .pri.top{display:none}.emb .hero{padding-top:48px}
+@media(max-width:1100px){.emb .links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surf);padding:14px 18px;border-bottom:1px solid var(--line)}.emb .links.open{display:flex}.emb #menuBtn{display:inline-flex;margin-left:auto}}
 @media(max-width:860px){.links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surf);padding:14px 18px;border-bottom:1px solid var(--line)}.links.open{display:flex}#menuBtn{display:inline-flex;margin-left:auto}.nav .pri.top{display:none}}
 section{padding:64px 0;border-bottom:1px solid var(--line)}
 .hero{padding:80px 0 64px}.hero h1{font-size:clamp(32px,5vw,52px)}.hero h1 span{color:var(--yellow)}
@@ -197,7 +199,12 @@ footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
 
 <script>
 (()=>{"use strict";
-const $=id=>document.getElementById(id),FN="/.netlify/functions/",ON_WEB=/^https?:/.test(location.protocol);
+const $=id=>document.getElementById(id),FN="/.netlify/functions/";
+/* Inside the Auto-Trader app (embedded page): app links switch views in the app instead of loading pages */
+const EMB=window.parent!==window,ON_WEB=/^https?:/.test(EMB?(window.TZ_PARENT_PROTO||"http:"):location.protocol);
+if(EMB)document.documentElement.classList.add("emb");
+if(EMB)document.addEventListener("click",e=>{const a=e.target.closest('a[href="/"],a[href^="/#"]');if(!a)return;e.preventDefault();
+  try{window.parent.postMessage({tz:"home",go:a.getAttribute("href")},"*")}catch(err){}});
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const kes=n=>"KES "+Math.round(+n).toLocaleString();
 $("yr").textContent=new Date().getFullYear();
@@ -275,9 +282,10 @@ function watch(id,t0,limit){clearTimeout(S.poll);S.poll=setTimeout(async()=>{let
   if(d&&d.status==="paid")return paid(d);
   if(d&&(d.status==="failed"||d.status==="cancelled")){busy(false);return out(`${d.status==="cancelled"?"You cancelled the payment.":"The payment didn't go through."} Nothing was charged.`,"e")}
   if(Date.now()-t0>limit){busy(false);return out("No confirmation yet. If you paid, keep your confirmation and contact us on WhatsApp.","y")}watch(id,t0,limit)},3000)}
-/* back from Pesapal */
-(()=>{const u=new URL(location.href),id=u.searchParams.get("OrderTrackingId");if(u.searchParams.get("pay")!=="pesapal"||!id||!/^[\w-]{6,80}$/.test(id))return;
-  history.replaceState(null,"",location.pathname+"#shop");$("cart").classList.remove("hide");busy(true);out("Checking your payment with Pesapal…","y");watch(id,Date.now(),180000)})();
+/* back from Pesapal (standalone page: from the address; inside the app: handed over by the app) */
+(()=>{let id=window.TZ_PP_RETURN||"";if(!id){const u=new URL(location.href);if(u.searchParams.get("pay")!=="pesapal")return;id=u.searchParams.get("OrderTrackingId")||"";
+    if(id)history.replaceState(null,"",location.pathname+"#shop")}
+  if(!id||!/^[\w-]{6,80}$/.test(id))return;document.getElementById("shop").scrollIntoView();$("cart").classList.remove("hide");busy(true);out("Checking your payment with Pesapal…","y");watch(id,Date.now(),180000)})();
 S.eas=EA_FALLBACK;renderEAs();renderCart();
 if(ON_WEB)fetch(FN+"ea-catalog",{cache:"no-store"}).then(r=>r.json()).then(d=>{S.cfg=d;if(d.eas&&d.eas.length)S.eas=d.eas;
   ["mpesa","pesapal","paypal"].forEach(m=>$("coMethod").querySelector(`[data-m="${m}"]`).classList.toggle("hide",!d[m]));
