@@ -1,7 +1,8 @@
 // Access control: who has paid, one-time email codes, one device per person, testers and admin.
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import { sb, cfg, missingDb, dbUpdate, finalize, PLANS } from "./pay.mjs";
-import { sendMail, codeEmail } from "./mail.mjs";
+import { sendMail, codeEmail, plainEmail } from "./mail.mjs";
+import { eaById } from "./eas.mjs";
 
 export const ADMIN_EMAIL = () => (process.env.ADMIN_EMAIL || "dennisombachi234@gmail.com").trim().toLowerCase();
 const SECRET = () => process.env.ACCESS_SECRET || "";
@@ -18,7 +19,7 @@ export async function accessFor(c, email) {
   if (email === ADMIN_EMAIL()) return { email, admin: true, binaryUntil: FAR, forexUntil: FAR };
   const e = encodeURIComponent(email);
   const [pays, grants] = await Promise.all([
-    sb(c, "payments?select=scope,expires_at&status=eq.paid&payer=eq." + e),
+    sb(c, "payments?select=scope,expires_at&status=eq.paid&kind=eq.plan&payer=eq." + e),
     sb(c, "grants?select=scope,until&email=eq." + e) ]);
   const rows = [...(pays || []).map(p => ({ scope: p.scope, t: p.expires_at })), ...(grants || []).map(g => ({ scope: g.scope, t: g.until }))];
   const max = (ok) => rows.filter(r => r.t && ok(r.scope)).map(r => r.t).sort().pop() || null;
@@ -72,9 +73,27 @@ export async function redeemCode(c, email, code) {
   return { ok: true };
 }
 
+/** Signed, permanent download links for a paid EA order. */
+export const dlSig = (orderId, eaId) => sha("dl|" + orderId + "|" + eaId + "|" + SECRET()).slice(0, 32);
+export function downloadLinks(row, site) {
+  return String(row.items || "").split(",").filter(Boolean).map(id => {
+    const e = eaById(id);
+    return { id, name: e ? e.version + " " + e.name : id,
+      url: `${site}/.netlify/functions/ea-download?o=${encodeURIComponent(row.checkout_id)}&i=${encodeURIComponent(id)}&s=${dlSig(row.checkout_id, id)}` };
+  });
+}
+
 /** Marks a pending payment with a verdict; when it becomes paid, emails the access code. */
 export async function settle(c, id, row, verdict) {
   const upd = await dbUpdate(c, id, await finalize(c, row, verdict));
+  if (upd && upd.status === "paid" && upd.kind === "ea" && upd.payer && upd.payer.includes("@")) {
+    const site = (c.site || "").replace(/\/$/, ""), links = downloadLinks(upd, site);
+    await sendMail(upd.payer, "Your TRIOZIZZFX Expert Advisors", plainEmail(`<p>Thank you for your purchase. Download your EAs here:</p><ul>${
+      links.map(l => `<li><a href="${l.url}">${l.name}</a></li>`).join("")}</ul>
+<p>These links keep working: save this email. Install: copy the file into MetaTrader 5 → File → Open Data Folder → MQL5 → Experts, then restart MT5.</p>
+<p>Always test an EA on a demo account first.</p>`)).catch(e => console.error("ea email", e.message));
+    return upd;
+  }
   if (upd && upd.status === "paid" && upd.payer && upd.payer.includes("@")) {
     await issueCode(c, upd.payer, { ttlMin: 7 * 24 * 60, why: "Thank you for your payment. Here is your access code",
       plan: (PLANS[upd.plan] || {}).name, expires: upd.expires_at }).catch(e => console.error("code email", e.message));

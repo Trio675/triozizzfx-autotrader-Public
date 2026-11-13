@@ -13,7 +13,7 @@ export default async (req) => {
       case "list": {
         const [review, recent, grants] = await Promise.all([
           sb(c, "payments?select=*&provider=eq.paypal&status=eq.pending&order=created_at.desc&limit=50"),
-          sb(c, "payments?select=created_at,provider,payer,phone,plan,amount,currency,status,receipt,expires_at,bonus_days&order=created_at.desc&limit=60"),
+          sb(c, "payments?select=created_at,provider,payer,phone,plan,kind,items,amount,currency,status,receipt,expires_at,bonus_days&order=created_at.desc&limit=60"),
           sb(c, "grants?select=*&order=created_at.desc&limit=60") ]);
         const paid = (recent || []).filter(p => p.status === "paid");
         return json({ ok: true, review, recent, grants, mail: mailReady(), plans: PLANS,

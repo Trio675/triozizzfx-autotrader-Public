@@ -60,3 +60,13 @@ Easiest without a domain: Gmail.
 - Binary plan: everything in the app now. Forex plan: forex tools (coming).
 - One device per person: a code unlocks one device; using a code on a new device signs out the old one.
 - Admin (ADMIN_EMAIL): full access + Admin page (approve PayPal, give free days, resend codes).
+
+## 5. EA shop (/home/#shop)
+- Products, prices and descriptions: `EAS` in `netlify/lib/eas.mjs` (TZ V1.0, V2.0, V3.0 at KES 5,000).
+- Bundle discounts: 2 EAs 10%, 3 EAs 15%, 4 EAs 20%, 5+ EAs 30% (`BUNDLE`).
+- An EA shows "Coming soon" until it has a file. To put one on sale:
+  1. Supabase -> Storage -> New bucket `eas` (keep it PRIVATE).
+  2. Upload the EA (e.g. `tz-v1.0.zip` with the .ex5 inside).
+  3. In `netlify/lib/eas.mjs` set `file: "tz-v1.0.zip"` for that EA and push.
+- After payment the buyer sees download buttons and gets them by email. Links only work for paid orders.
+- Re-run `netlify/supabase.sql` once (adds the `kind` and `items` columns).

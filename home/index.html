@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRIOZIZZFX — Auto-Trader, Expert Advisors & Trading Tools</title>
+<meta name="description" content="TRIOZIZZFX: the Auto-Trader for Deriv, MetaTrader 5 Expert Advisors, free trading calculators, guides and mentorship. Pay with M-Pesa, Airtel Money, card or PayPal.">
+<meta property="og:title" content="TRIOZIZZFX — Auto-Trader, Expert Advisors & Trading Tools">
+<meta property="og:description" content="Deriv Auto-Trader, MT5 Expert Advisors, free calculators and mentorship.">
+<link rel="icon" href="logo.png">
+<style>
+:root{--bg:#0b1020;--surf:#121a2e;--surf2:#172137;--line:#233049;--line2:#2c3b5a;--txt:#e8ecf6;--mut:#8b96b3;--acc:#6c7cff;--acc2:#8b98ff;--green:#2fbf71;--red:#ef4f5f;--yellow:#f2c94c}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc2)}h1,h2,h3{line-height:1.2;margin:0 0 .5em}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+header{position:sticky;top:0;z-index:20;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--txt);font-weight:800;font-size:19px}
+.brand img{width:34px;height:34px;border-radius:9px}.brand b{color:var(--yellow)}
+.links{display:flex;gap:16px;margin-left:auto}.links a{color:var(--mut);text-decoration:none;font-weight:600;font-size:15px}.links a:hover{color:var(--txt)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:11px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.pri{background:var(--acc);color:#fff}.pri:hover{background:var(--acc2)}.pri:disabled{opacity:.45;cursor:not-allowed}
+.ghost{background:transparent;color:var(--txt);border:1px solid var(--line2)}.ghost:hover{border-color:var(--acc)}
+.cartbtn{position:relative}.cartn{background:var(--yellow);color:#111;border-radius:99px;font-size:12px;padding:1px 7px;margin-left:2px}
+#menuBtn{display:none}
+@media(max-width:860px){.links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surf);padding:14px 18px;border-bottom:1px solid var(--line)}.links.open{display:flex}#menuBtn{display:inline-flex;margin-left:auto}.nav .pri.top{display:none}}
+section{padding:64px 0;border-bottom:1px solid var(--line)}
+.hero{padding:80px 0 64px}.hero h1{font-size:clamp(32px,5vw,52px)}.hero h1 span{color:var(--yellow)}
+.lead{color:var(--mut);font-size:18px;max-width:720px}.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}.chip{border:1px solid var(--line2);border-radius:99px;padding:5px 12px;font-size:13px;color:var(--mut)}
+.grid{display:grid;gap:16px}.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card h3{font-size:18px}.mut{color:var(--mut)}.small{font-size:13px}
+.kicker{color:var(--yellow);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.sec-head{margin-bottom:26px}.sec-head p{color:var(--mut);max-width:760px;margin:0}
+.price{font-size:28px;font-weight:800}.price small{font-size:14px;color:var(--mut);font-weight:600}
+.plans{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.plan ul{padding-left:18px;color:var(--mut);margin:10px 0 16px}.plan .row{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding:10px 0}
+.banner{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:linear-gradient(90deg,rgba(242,201,76,.14),rgba(108,124,255,.14));border:1px solid rgba(242,201,76,.4);border-radius:14px;padding:14px 16px;margin-bottom:20px}
+.banner b{color:var(--yellow)}.pill{background:var(--surf2);border:1px solid var(--line2);border-radius:99px;padding:4px 10px;font-size:13px;font-weight:700}
+.ea{display:flex;flex-direction:column}.ea .ver{font-weight:900;color:var(--yellow);font-size:14px;letter-spacing:.04em}
+.ea dl{margin:10px 0 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:14px}.ea dt{color:var(--mut)}.ea dd{margin:0}
+.ea .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.ea .foot .btn{white-space:nowrap}
+.ea .price{font-size:24px;white-space:nowrap}.ea .price small{display:block;font-size:13px}
+.soon{font-size:12px;font-weight:800;color:#111;background:var(--yellow);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:2px}
+label{display:block;font-weight:600;margin:12px 0 6px;font-size:14px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font:inherit;color:var(--txt)}
+.seg{display:flex;border:1px solid var(--line2);border-radius:11px;overflow:hidden;margin-top:14px}.seg button{flex:1;background:transparent;border:0;color:var(--mut);padding:10px;font:inherit;font-weight:700;cursor:pointer}.seg button.on{background:var(--surf2);color:var(--txt)}
+.out{margin-top:12px;border-radius:12px;padding:10px 12px;border:1px solid var(--line);font-size:14px}.out.g{border-color:rgba(47,191,113,.6);background:rgba(47,191,113,.1)}.out.e{border-color:rgba(239,79,95,.55);background:rgba(239,79,95,.08)}.out.y{border-color:rgba(242,201,76,.5);background:rgba(242,201,76,.08)}
+.hide{display:none!important}
+.calc .res{margin-top:14px;background:var(--surf2);border-radius:12px;padding:12px;font-size:15px}.calc .res b{color:var(--yellow)}
+details{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}summary{cursor:pointer;font-weight:700}details p,details li{color:var(--mut)}
+.contact a{display:block;margin:6px 0;text-decoration:none}
+footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
+#cart{position:fixed;right:16px;bottom:16px;width:min(420px,calc(100vw - 32px));max-height:calc(100vh - 100px);overflow:auto;z-index:30;background:var(--surf);border:1px solid var(--line2);border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#cart .line{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+#cart .x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:16px}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:18px;margin-top:10px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:25;background:var(--surf2);border:1px solid var(--line2);border-radius:14px;padding:10px 12px 10px 16px;display:flex;gap:12px;align-items:center;font-weight:700;box-shadow:0 12px 40px rgba(0,0,0,.45);max-width:calc(100vw - 24px)}
+#toast .btn{padding:7px 12px}
+.dl a{display:block;margin:6px 0;font-weight:700}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="#top"><img src="logo.png" alt="">TRIOZIZZ<b>FX</b></a>
+  <nav class="links" id="links"><a href="#autotrader">Auto-Trader</a><a href="#shop">EA Shop</a><a href="#tools">Free tools</a><a href="#learn">Learn</a><a href="#mentor">Mentorship</a><a href="#contact">Contact</a></nav>
+  <button class="btn ghost cartbtn" id="cartOpen" type="button">Cart <span class="cartn" id="cartN">0</span></button>
+  <a class="btn pri top" href="/">Open Auto-Trader</a>
+  <button class="btn ghost" id="menuBtn" type="button" aria-label="Menu">☰</button>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="wrap">
+  <div class="kicker">Trading technology</div>
+  <h1>Automate your Deriv trading.<br><span>Trade with a plan, not guesswork.</span></h1>
+  <p class="lead">The TRIOZIZZFX Auto-Trader runs bots and signals on your own Deriv account. Add MetaTrader 5 Expert Advisors, free calculators, guides and 1-on-1 mentorship, all in one place.</p>
+  <div class="cta"><a class="btn pri" href="/">Open the Auto-Trader</a><a class="btn ghost" href="#shop">Browse Expert Advisors</a><a class="btn ghost" href="#tools">Free tools</a></div>
+  <div class="chips"><span class="chip">M-Pesa</span><span class="chip">Airtel Money</span><span class="chip">Visa / Mastercard</span><span class="chip">PayPal</span><span class="chip">Your money stays in your own Deriv / broker account</span></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><div class="kicker">What you get</div><h2>Everything a trader needs</h2></div>
+  <div class="grid g3">
+    <div class="card"><h3>🤖 Auto-Trader</h3><p class="mut">Signal engine, Auto bot, 20+ XML and TZ bots, Top 3 autopick, digit signals, markets, Strategy Lab and copy trading for Deriv.</p><a href="#autotrader">See plans →</a></div>
+    <div class="card"><h3>⚙️ Expert Advisors</h3><p class="mut">TZ-series MetaTrader 5 EAs. One-time purchase, instant download, bundle discounts up to 30%.</p><a href="#shop">Visit the EA shop →</a></div>
+    <div class="card"><h3>🧮 Free tools</h3><p class="mut">Lot size, risk/reward and martingale calculators. Free, no sign-up.</p><a href="#tools">Use the tools →</a></div>
+    <div class="card"><h3>📚 Learn</h3><p class="mut">Short guides: installing EAs, risk management, trading psychology and Deriv digit contracts.</p><a href="#learn">Read the guides →</a></div>
+    <div class="card"><h3>🎯 Mentorship</h3><p class="mut">1-on-1 coaching and a free weekly group session with TRIOZIZZFX.</p><a href="#mentor">Book a session →</a></div>
+    <div class="card"><h3>🔒 Safe by design</h3><p class="mut">We never hold your money. The Auto-Trader trades your Deriv account with your permission, and you can stop it any time.</p></div>
+  </div>
+</div></section>
+
+<section id="autotrader"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Auto-Trader plans</div><h2>Subscribe to the Auto-Trader</h2>
+    <p>Your <b>first payment gets 5 extra days free</b>. Renewing adds days after your current plan ends. Free without a plan: the Six Step Cycle bot on demo or paper.</p></div>
+  <div class="plans" id="plans"></div>
+  <p class="mut small" style="margin-top:14px">You subscribe inside the Auto-Trader (Account → Subscribe) with M-Pesa, Airtel Money, card or PayPal. Your access code is emailed to you.</p>
+</div></section>
+
+<section id="shop"><div class="wrap">
+  <div class="sec-head"><div class="kicker">EA shop</div><h2>TZ Expert Advisors for MetaTrader 5</h2>
+    <p>One-time purchase. Download right after paying, and the links are emailed to you. Each EA is numbered by version: a new main number is a new EA, a decimal (like V1.1) is an update.</p></div>
+  <div class="banner"><b>Bundle and save:</b><span class="pill">2 EAs −10%</span><span class="pill">3 EAs −15%</span><span class="pill">4 EAs −20%</span><span class="pill">5+ EAs −30%</span></div>
+  <div class="grid g3" id="eaList"><p class="mut">Loading Expert Advisors…</p></div>
+  <p class="mut small" style="margin-top:14px">Always test an EA on a demo account first. Results depend on your broker, settings and market conditions. No EA wins every trade.</p>
+</div></section>
+
+<section id="tools"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Free tools</div><h2>Trading calculators</h2><p>Plan your size and risk before you place a trade.</p></div>
+  <div class="grid g3">
+    <div class="card calc"><h3>Lot size</h3>
+      <label for="lsBal">Account balance ($)</label><input id="lsBal" type="number" value="100" min="0" step="any">
+      <label for="lsRisk">Risk per trade (%)</label><input id="lsRisk" type="number" value="1" min="0" step="any">
+      <label for="lsSl">Stop loss (pips)</label><input id="lsSl" type="number" value="20" min="0" step="any">
+      <label for="lsPip">Pip value for 1 lot ($)</label><input id="lsPip" type="number" value="10" min="0" step="any">
+      <div class="res" id="lsOut"></div><p class="mut small">Most USD-quoted forex pairs: $10 per pip for 1 lot. Check your broker's contract for gold, indices and synthetics.</p></div>
+    <div class="card calc"><h3>Risk / reward</h3>
+      <label for="rrEntry">Entry price</label><input id="rrEntry" type="number" value="1.0850" step="any">
+      <label for="rrSl">Stop loss price</label><input id="rrSl" type="number" value="1.0830" step="any">
+      <label for="rrTp">Take profit price</label><input id="rrTp" type="number" value="1.0890" step="any">
+      <div class="res" id="rrOut"></div></div>
+    <div class="card calc"><h3>Martingale planner</h3>
+      <label for="mgBase">Base stake ($)</label><input id="mgBase" type="number" value="0.35" min="0" step="any">
+      <label for="mgMul">Multiplier after a loss</label><input id="mgMul" type="number" value="2" min="1" step="any">
+      <label for="mgSteps">Losses in a row to plan for</label><input id="mgSteps" type="number" value="6" min="1" max="20" step="1">
+      <div class="res" id="mgOut"></div></div>
+  </div>
+</div></section>
+
+<section id="learn"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Learn</div><h2>Quick guides</h2></div>
+  <details><summary>Install an Expert Advisor in MetaTrader 5</summary><ol>
+    <li>Open MT5 → <b>File</b> → <b>Open Data Folder</b>.</li><li>Open <b>MQL5</b> → <b>Experts</b> and paste the EA file there.</li>
+    <li>Restart MT5 (or right-click <b>Expert Advisors</b> in the Navigator → <b>Refresh</b>).</li>
+    <li>Drag the EA onto a chart, tick <b>Allow Algo Trading</b>, set your inputs, and press OK.</li>
+    <li>Turn on the <b>Algo Trading</b> button in the toolbar. Test on a demo account first.</li></ol></details>
+  <details><summary>Risk management basics</summary><ul>
+    <li>Risk a small, fixed part of your balance per trade, often 1–2%.</li><li>Always use a stop loss, and set a daily loss limit you won't break.</li>
+    <li>Martingale grows stakes fast: plan the worst losing streak before you start.</li><li>Never trade money you can't afford to lose.</li></ul></details>
+  <details><summary>Trading psychology</summary><ul>
+    <li>Follow your plan. Don't chase losses with bigger stakes.</li><li>Stop for the day after hitting your target or your limit.</li>
+    <li>Keep a journal: what you traded, why, and what happened.</li></ul></details>
+  <details><summary>How Deriv digit contracts work</summary><ul>
+    <li>Digit contracts pay out based on the last digit of the price after a set number of ticks.</li>
+    <li><b>Over/Under</b> with a high chance (like Over 1) pays little; a low chance (like Over 8) pays more but loses most of the time.</li>
+    <li><b>Even/Odd</b> is close to 50/50. Deriv's payout means you need to win a bit over half the time to break even.</li></ul></details>
+</div></section>
+
+<section id="mentor"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Mentorship</div><h2>Learn with TRIOZIZZFX</h2></div>
+  <div class="grid g2">
+    <div class="card"><h3>1-on-1 mentorship</h3><p class="mut">Personal sessions on your strategy, risk plan, MT5 setup and using the Auto-Trader. Ask on WhatsApp for times and price.</p>
+      <a class="btn pri" target="_blank" rel="noopener" href="https://wa.me/254114268295?text=Hi%20TRIOZIZZFX%2C%20I%27d%20like%201-on-1%20mentorship.">Book on WhatsApp</a></div>
+    <div class="card"><h3>Free weekly session</h3><p class="mut">A free group session every week: market review, questions and tool walkthroughs.</p>
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/254114268295?text=Hi%20TRIOZIZZFX%2C%20please%20add%20me%20to%20the%20free%20weekly%20session.">Join on WhatsApp</a></div>
+  </div>
+</div></section>
+
+<section id="contact"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Contact</div><h2>Talk to us</h2></div>
+  <div class="grid g3 contact">
+    <div class="card"><h3>WhatsApp</h3><a target="_blank" rel="noopener" href="https://wa.me/254114268295">+254 114 268 295</a><a target="_blank" rel="noopener" href="https://wa.me/254723493342">+254 723 493 342</a></div>
+    <div class="card"><h3>Call & email</h3><a href="tel:+254748826252">+254 748 826 252</a><a href="mailto:triozizzy@gmail.com">triozizzy@gmail.com</a></div>
+    <div class="card"><h3>Follow</h3><a target="_blank" rel="noopener" href="https://www.tiktok.com/@triozizzfx">TikTok @triozizzfx</a><a target="_blank" rel="noopener" href="https://www.instagram.com/triozizzfx">Instagram @triozizzfx</a><a target="_blank" rel="noopener" href="https://www.youtube.com/@triozizzfx">YouTube @triozizzfx</a><a target="_blank" rel="noopener" href="https://x.com/TrioZizz">X @TrioZizz</a></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <p><b>Risk disclosure.</b> Trading forex, CFDs, synthetic indices and options carries a high risk of losing money. Past results don't guarantee future results. Only trade money you can afford to lose. Nothing here is financial advice.</p>
+  <p>TRIOZIZZFX sells trading software and education. It is not a broker and is not affiliated with Deriv, MetaQuotes or TradingView. <b>Payments are non-refundable.</b></p>
+  <p>© <span id="yr"></span> TRIOZIZZFX</p>
+</div></footer>
+
+<div id="toast" class="hide" role="status"></div>
+<aside id="cart" class="hide" aria-label="Cart">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Your EAs</h3><button class="x" id="cartClose" type="button" aria-label="Close">✕</button></div>
+  <div id="cartLines"></div>
+  <div id="cartSum"></div>
+  <div id="checkout">
+    <label for="coEmail">Your email <span class="mut small">(download links are sent here)</span></label><input id="coEmail" type="email" autocomplete="email" placeholder="you@example.com">
+    <div class="seg" id="coMethod"><button data-m="mpesa" class="on" type="button">M-Pesa</button><button data-m="pesapal" type="button">Airtel · Card</button><button data-m="paypal" type="button">PayPal</button></div>
+    <div id="coMpesa"><label for="coPhone">M-Pesa number</label><input id="coPhone" type="tel" inputmode="tel" placeholder="0712 345 678"><button class="btn pri" id="coPayM" type="button" style="width:100%;margin-top:12px">Pay with M-Pesa</button></div>
+    <div id="coPp" class="hide"><button class="btn pri" id="coPayP" type="button" style="width:100%;margin-top:12px">Continue to secure payment</button><p class="mut small">Pay on Pesapal's page with Airtel Money, card, bank or M-Pesa.</p></div>
+    <div id="coPal" class="hide"><p class="small" id="coPalTxt"></p><a class="btn pri" id="coPalOpen" target="_blank" rel="noopener" href="#" style="width:100%">Pay with PayPal</a>
+      <label for="coTxn">PayPal transaction ID</label><input id="coTxn" maxlength="24" placeholder="e.g. 8AB12345CD678901E">
+      <button class="btn ghost" id="coPalSend" type="button" style="width:100%;margin-top:10px">I've paid: send for approval</button><p class="mut small">PayPal orders are checked by hand, usually within 24 hours.</p></div>
+  </div>
+  <div id="coOut" class="out hide"></div>
+  <p class="mut small">Payments are non-refundable. Test on demo first.</p>
+</aside>
+
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id),FN="/.netlify/functions/",ON_WEB=/^https?:/.test(location.protocol);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const kes=n=>"KES "+Math.round(+n).toLocaleString();
+$("yr").textContent=new Date().getFullYear();
+$("menuBtn").onclick=()=>$("links").classList.toggle("open");
+$("links").addEventListener("click",e=>{if(e.target.tagName==="A")$("links").classList.remove("open")});
+
+/* ---------- Auto-Trader plans (prices from the server, fallback to the agreed list) ---------- */
+const PLANS_FALLBACK=[{id:"b1w",name:"Binary · 1 week",scope:"binary",usd:5,kes:650},{id:"b1m",name:"Binary · 1 month",scope:"binary",usd:10,kes:1300},
+  {id:"f2w",name:"Forex · 2 weeks",scope:"forex",usd:15,kes:1950},{id:"f1m",name:"Forex · 1 month",scope:"forex",usd:25,kes:3250},
+  {id:"a2w",name:"Binary + Forex · 2 weeks",scope:"both",usd:20,kes:2600},{id:"a1m",name:"Binary + Forex · 1 month",scope:"both",usd:30,kes:3900}];
+const SCOPES=[["binary","Binary","Everything in the Auto-Trader: engine, bots, signals, markets, Lab, Auto bot and copy trading."],
+  ["forex","Forex","Forex tools in the Auto-Trader (being added now)."],["both","Binary + Forex","Everything: all binary and forex tools."]];
+function renderPlans(list){$("plans").innerHTML=SCOPES.map(([k,t,d])=>`<div class="card plan"><h3>${t}</h3><p class="mut small">${d}</p>`+
+  list.filter(p=>p.scope===k&&!p.test).map(p=>`<div class="row"><span>${esc(p.name.replace(/^.*· /,""))}</span><span class="price">$${p.usd} <small>${kes(p.kes)}</small></span></div>`).join("")+
+  `<a class="btn pri" href="/#subscribe" style="width:100%;margin-top:8px">Subscribe</a></div>`).join("")}
+renderPlans(PLANS_FALLBACK);
+if(ON_WEB)fetch(FN+"plans",{cache:"no-store"}).then(r=>r.json()).then(d=>{if(d&&d.plans&&d.plans.length)renderPlans(d.plans)}).catch(()=>{});
+
+/* ---------- EA shop ---------- */
+const S={eas:[],cfg:null,cart:[],method:"mpesa",busy:false,poll:null};
+try{S.cart=JSON.parse(localStorage.getItem("tz_ea_cart")||"[]")}catch(e){}
+const saveCart=()=>{try{localStorage.setItem("tz_ea_cart",JSON.stringify(S.cart))}catch(e){}};
+const EA_FALLBACK=[{id:"tz-v1.0",version:"TZ V1.0",name:"Triozizz Flipping",kes:5000,usd:39,platform:"MetaTrader 5",trades:"Volatility indices, forex majors and gold",how:"Flips direction with short-term momentum, with a fixed stop loss and take profit on every trade.",available:false},
+  {id:"tz-v2.0",version:"TZ V2.0",name:"High-Frequency Scalper",kes:5000,usd:39,platform:"MetaTrader 5",trades:"Volatility indices, forex, gold and Bitcoin",how:"Many quick scalps on small moves, with tight stops, a spread filter and a daily loss limit.",available:false},
+  {id:"tz-v3.0",version:"TZ V3.0",name:"EMA Trend",kes:5000,usd:39,platform:"MetaTrader 5",trades:"Forex majors and gold",how:"Trades in the direction of fast/slow EMA crossovers, with stops sized from market volatility (ATR) and a trailing stop.",available:false}];
+const BUNDLE=[[5,30],[4,20],[3,15],[2,10]],pctFor=n=>(BUNDLE.find(([k])=>n>=k)||[0,0])[1];
+function renderEAs(){
+  $("eaList").innerHTML=S.eas.map(e=>{const inCart=S.cart.includes(e.id);return `<div class="card ea">
+    <div class="ver">${esc(e.version)}${e.available?"":'<span class="soon">COMING SOON</span>'}</div><h3>${esc(e.name)}</h3>
+    <dl><dt>Platform</dt><dd>${esc(e.platform)}</dd><dt>Trades</dt><dd>${esc(e.trades)}</dd><dt>How</dt><dd>${esc(e.how)}</dd></dl>
+    <div class="foot"><span class="price">${kes(e.kes)} <small>≈ $${e.usd}</small></span>${e.available
+      ?`<button class="btn ${inCart?"ghost":"pri"}" data-add="${esc(e.id)}" type="button">${inCart?"In cart ✓":"Add to cart"}</button>`
+      :`<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/254114268295?text=${encodeURIComponent("Hi TRIOZIZZFX, tell me when "+e.version+" "+e.name+" is ready.")}">Notify me</a>`}</div></div>`}).join("")}
+function cartTotals(){const items=S.cart.map(id=>S.eas.find(e=>e.id===id)).filter(e=>e&&e.available),pct=pctFor(items.length),
+  k=items.reduce((s,e)=>s+e.kes,0),u=items.reduce((s,e)=>s+e.usd,0);
+  return {items,pct,full:k,kes:Math.round(k*(100-pct)/100),usd:Math.round(u*(100-pct))/100}}
+function renderCart(){
+  S.cart=S.cart.filter(id=>S.eas.some(e=>e.id===id&&e.available));saveCart();const t=cartTotals();$("cartN").textContent=t.items.length;
+  $("cartLines").innerHTML=t.items.length?t.items.map(e=>`<div class="line"><span><b>${esc(e.version)}</b> ${esc(e.name)}</span><span>${kes(e.kes)} <button class="x" data-rm="${esc(e.id)}" type="button" aria-label="Remove">✕</button></span></div>`).join("")
+    :'<p class="mut">Your cart is empty. Add an EA from the shop.</p>';
+  const next=BUNDLE.slice().reverse().find(([n])=>n>t.items.length);
+  $("cartSum").innerHTML=t.items.length?`${t.pct?`<div class="line"><span>Bundle discount (${t.pct}%)</span><span class="mut">−${kes(t.full-t.kes)}</span></div>`:""}
+    <div class="tot"><span>Total</span><span>${kes(t.kes)}</span></div><p class="mut small">≈ $${t.usd} by PayPal.${next?` Add ${next[0]-t.items.length} more for ${next[1]}% off.`:""}</p>`:"";
+  $("checkout").classList.toggle("hide",!t.items.length);palLink()}
+document.addEventListener("click",e=>{const a=e.target.closest("[data-add]"),r=e.target.closest("[data-rm]");
+  if(a){if(!S.cart.includes(a.dataset.add))S.cart.push(a.dataset.add);renderEAs();renderCart();const t=cartTotals();
+    toast(`Added to cart · ${t.items.length} EA${t.items.length>1?"s":""}${t.pct?` · ${t.pct}% off`:""} <button class="btn pri" type="button" id="toastView">View cart</button>`)}
+  if(r){S.cart=S.cart.filter(x=>x!==r.dataset.rm);renderEAs();renderCart()}});
+let toastT=null;function toast(html){const t=$("toast");t.innerHTML=html;t.classList.remove("hide");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hide"),4000);
+  const v=$("toastView");if(v)v.onclick=()=>{t.classList.add("hide");renderCart();$("cart").classList.remove("hide")}}
+$("cartOpen").onclick=()=>{renderCart();$("cart").classList.toggle("hide")};$("cartClose").onclick=()=>$("cart").classList.add("hide");
+function setMethod(m){S.method=m;$("coMethod").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+  $("coMpesa").classList.toggle("hide",m!=="mpesa");$("coPp").classList.toggle("hide",m!=="pesapal");$("coPal").classList.toggle("hide",m!=="paypal");palLink()}
+$("coMethod").querySelectorAll("button").forEach(b=>b.onclick=()=>setMethod(b.dataset.m));
+function palLink(){const c=S.cfg,t=cartTotals();if(!c||!t.items.length)return;
+  $("coPalTxt").innerHTML=`Pay <b>$${t.usd}</b> to <b>${esc(c.paypalEmail)}</b>, then enter your PayPal transaction ID below.`;
+  $("coPalOpen").href="https://www.paypal.com/cgi-bin/webscr?"+new URLSearchParams({cmd:"_xclick",business:c.paypalEmail,item_name:"TRIOZIZZFX EA: "+t.items.map(e=>e.version).join(", "),amount:t.usd.toFixed(2),currency_code:"USD",no_shipping:"1"})}
+function out(html,cls){const b=$("coOut");b.className="out "+(cls||"");b.innerHTML=html;b.classList.remove("hide")}
+const email=()=>{const v=$("coEmail").value.trim().toLowerCase();return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)?v:null};
+async function post(fn,body){let r;try{r=await fetch(FN+fn,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}catch(e){throw new Error("Can't reach the server. Check your internet.")}
+  const d=await r.json().catch(()=>({error:r.status===404?"The shop isn't switched on on this website yet.":"Unexpected reply ("+r.status+")"}));if(!r.ok||!d.ok)throw new Error(d.error||"Something went wrong.");return d}
+function busy(on){S.busy=on;["coPayM","coPayP","coPalSend"].forEach(id=>$(id).disabled=on)}
+function pre(){if(!ON_WEB){out("Buying works on the TRIOZIZZFX website.","e");return null}const t=cartTotals();if(!t.items.length){out("Your cart is empty.","e");return null}
+  const em=email();if(!em){out("Enter your email. Your download links are sent there.","e");return null}return {ids:t.items.map(e=>e.id),em}}
+$("coPayM").onclick=async()=>{if(S.busy)return;const p=pre();if(!p)return;const ph=$("coPhone").value;if(!/^\+?\d[\d\s]{8,}$/.test(ph.trim()))return out("Enter your Safaricom number, like 0712345678.","e");
+  busy(true);out("Sending the M-Pesa prompt to your phone…","");try{const d=await post("stk-push",{eas:p.ids,email:p.em,phone:ph});
+    out(`<b>Check your phone.</b> Enter your M-Pesa PIN to pay ${kes(d.amount)}.<br><small>Waiting for M-Pesa…</small>`,"y");watch(d.id,Date.now(),120000)}catch(e){out(esc(e.message),"e");busy(false)}};
+$("coPayP").onclick=async()=>{if(S.busy)return;const p=pre();if(!p)return;busy(true);out("Opening the secure payment page…","");
+  try{const d=await post("pesapal-order",{eas:p.ids,email:p.em});if(!/^https:\/\/[\w.-]*pesapal\.com\//.test(d.redirect))throw new Error("Couldn't start the payment.");location.href=d.redirect}catch(e){out(esc(e.message),"e");busy(false)}};
+$("coPalSend").onclick=async()=>{if(S.busy)return;const p=pre();if(!p)return;const txn=$("coTxn").value.trim();if(!/^[A-Za-z0-9]{10,24}$/.test(txn))return out("Enter the PayPal transaction ID from your PayPal receipt.","e");
+  busy(true);try{const d=await post("paypal-submit",{eas:p.ids,email:p.em,txn});out(`<b>Received.</b> We'll check your PayPal payment and email your download links once it's approved.`,"g");$("coTxn").value=""}catch(e){out(esc(e.message),"e")}busy(false)};
+function paid(d){busy(false);S.cart=[];saveCart();renderEAs();renderCart();$("cart").classList.remove("hide");
+  out(`<b>Payment received. Thank you!</b>${d.receipt?`<br>Receipt: <b>${esc(d.receipt)}</b>`:""}<div class="dl">${(d.downloads||[]).map(l=>`<a href="${esc(l.url)}">⬇ Download ${esc(l.name)}</a>`).join("")}</div><small>We also emailed these links${d.email?" to "+esc(d.email):""}. Install: MT5 → File → Open Data Folder → MQL5 → Experts.</small>`,"g")}
+function watch(id,t0,limit){clearTimeout(S.poll);S.poll=setTimeout(async()=>{let d=null;try{const r=await fetch(FN+"pay-status?id="+encodeURIComponent(id),{cache:"no-store"});d=await r.json()}catch(e){}
+  if(d&&d.status==="paid")return paid(d);
+  if(d&&(d.status==="failed"||d.status==="cancelled")){busy(false);return out(`${d.status==="cancelled"?"You cancelled the payment.":"The payment didn't go through."} Nothing was charged.`,"e")}
+  if(Date.now()-t0>limit){busy(false);return out("No confirmation yet. If you paid, keep your confirmation and contact us on WhatsApp.","y")}watch(id,t0,limit)},3000)}
+/* back from Pesapal */
+(()=>{const u=new URL(location.href),id=u.searchParams.get("OrderTrackingId");if(u.searchParams.get("pay")!=="pesapal"||!id||!/^[\w-]{6,80}$/.test(id))return;
+  history.replaceState(null,"",location.pathname+"#shop");$("cart").classList.remove("hide");busy(true);out("Checking your payment with Pesapal…","y");watch(id,Date.now(),180000)})();
+S.eas=EA_FALLBACK;renderEAs();renderCart();
+if(ON_WEB)fetch(FN+"ea-catalog",{cache:"no-store"}).then(r=>r.json()).then(d=>{S.cfg=d;if(d.eas&&d.eas.length)S.eas=d.eas;
+  ["mpesa","pesapal","paypal"].forEach(m=>$("coMethod").querySelector(`[data-m="${m}"]`).classList.toggle("hide",!d[m]));
+  setMethod(d[S.method]?S.method:d.mpesa?"mpesa":d.pesapal?"pesapal":"paypal");renderEAs();renderCart()}).catch(()=>{});
+
+/* ---------- calculators ---------- */
+const v=id=>parseFloat($(id).value),ok=x=>isFinite(x)&&x>0,f2=x=>(+x).toLocaleString(undefined,{maximumFractionDigits:2});
+function calcLS(){const b=v("lsBal"),r=v("lsRisk"),sl=v("lsSl"),pv=v("lsPip");if(![b,r,sl,pv].every(ok))return $("lsOut").textContent="Fill in all four boxes.";
+  const risk=b*r/100,lots=risk/(sl*pv);$("lsOut").innerHTML=`Risk: <b>$${f2(risk)}</b><br>Lot size: <b>${lots<0.01?lots.toFixed(3):(Math.floor(lots*100)/100).toFixed(2)}</b> lots${lots<0.01?" <span class='mut'>(below the 0.01 minimum most brokers allow: widen your risk % or use a bigger account)</span>":""}`}
+function calcRR(){const e=v("rrEntry"),s=v("rrSl"),t=v("rrTp");if(![e,s,t].every(isFinite))return;const risk=Math.abs(e-s),rew=Math.abs(t-e);
+  if(!risk)return $("rrOut").textContent="Stop loss can't equal the entry.";const rr=rew/risk,be=100/(1+rr);
+  $("rrOut").innerHTML=`Risk : reward = <b>1 : ${rr.toFixed(2)}</b><br>You need to win more than <b>${be.toFixed(1)}%</b> of trades to break even.`}
+function calcMG(){const b=v("mgBase"),m=v("mgMul"),n=Math.min(20,Math.round(v("mgSteps")));if(!ok(b)||!(m>=1)||!(n>=1))return $("mgOut").textContent="Fill in all three boxes.";
+  let s=b,tot=0,rows=[];for(let i=1;i<=n;i++){tot+=s;rows.push(`#${i}: $${f2(s)}`);s*=m}
+  $("mgOut").innerHTML=`Stakes: ${rows.join(" · ")}<br>Total at risk after ${n} losses in a row: <b>$${f2(tot)}</b><br>Next stake would be <b>$${f2(s)}</b>.`}
+["lsBal","lsRisk","lsSl","lsPip"].forEach(id=>$(id).addEventListener("input",calcLS));["rrEntry","rrSl","rrTp"].forEach(id=>$(id).addEventListener("input",calcRR));
+["mgBase","mgMul","mgSteps"].forEach(id=>$(id).addEventListener("input",calcMG));calcLS();calcRR();calcMG();
+})();
+</script>
+</body>
+</html>

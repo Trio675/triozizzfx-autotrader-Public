@@ -96,7 +96,7 @@ export const dbInsert = (c, row) => sb(c, "payments", { method: "POST", body: JS
 export const dbUpdate = (c, checkoutId, patch) =>
   sb(c, "payments?checkout_id=eq." + encodeURIComponent(checkoutId) + "&status=eq.pending", { method: "PATCH", body: JSON.stringify(patch) }).then(r => r && r[0]);
 const dbPaidForPayer = (c, payer) =>
-  sb(c, "payments?select=scope,expires_at&status=eq.paid&payer=eq." + encodeURIComponent(payer));
+  sb(c, "payments?select=scope,expires_at&status=eq.paid&kind=eq.plan&payer=eq." + encodeURIComponent(payer));
 export const dbGet = (c, checkoutId) =>
   sb(c, "payments?select=*&checkout_id=eq." + encodeURIComponent(checkoutId)).then(r => r && r[0]);
 export const dbRecentForPhone = (c, phone, sinceIso) =>
@@ -108,6 +108,8 @@ export async function finalize(c, row, { ok, code, desc, receipt, paidAmount }) 
   if (!ok) return { status: +code === 1032 ? "cancelled" : "failed", result_code: +code || null, result_desc: desc || "Not paid" };
   if (paidAmount != null && +paidAmount < +row.amount)
     return { status: "failed", result_code: +code || 0, result_desc: `Paid ${paidAmount}, expected ${row.amount}` };
+  if (row.kind === "ea") return { status: "paid", result_code: +code || 0, result_desc: desc || "Paid", receipt: receipt || row.receipt || null,
+    paid_at: new Date().toISOString() };
   const plan = PLANS[row.plan] || { days: 0, scope: row.scope };
   let prior = [];
   try { prior = row.payer ? (await dbPaidForPayer(c, row.payer)) || [] : []; } catch (e) { prior = []; }

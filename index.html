@@ -60,7 +60,9 @@ aside{overflow-y:auto;background:var(--side);border-right:1px solid var(--line);
 .brand span{font-size:12px;color:var(--mut)}
 nav.side{display:flex;flex-direction:column;gap:4px}
 nav.side button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:10px 12px;border-radius:9px;color:var(--mut);font-weight:600}
-nav.side button svg{width:18px;height:18px;flex:none}
+nav.side button svg,nav.side a.navlink svg{width:18px;height:18px;flex:none}
+nav.side a.navlink{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:var(--mut);font-weight:600;text-decoration:none}
+nav.side a.navlink:hover{background:var(--surf);color:var(--txt)}
 nav.side button:hover{background:var(--surf);color:var(--txt)}
 nav.side button.on{background:var(--surf2);color:var(--txt);box-shadow:inset 3px 0 0 var(--acc)}
 .sidefoot{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--mut)}
@@ -411,6 +413,7 @@ input[type=time]{color:var(--txt);color-scheme:dark}[data-theme=light] input[typ
     <button data-t="rules"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Risk rules<span class="newtag">NEW</span></button>
     <button data-t="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>Open an account</button>
     <button data-t="admin" id="navAdmin" class="hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Admin</button>
+    <a class="navlink" id="navShop" href="/home/#shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-2 8H8z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>EA shop &amp; tools</a>
   </nav>
   <div class="sidefoot">
     <div class="today" id="todayCard"></div>
@@ -3899,7 +3902,7 @@ async function admLoad(){
     $("admStats").innerHTML=`<dt>Paid (last 60)</dt><dd>${d.stats.paid}</dd><dt>Collected</dt><dd>KES ${(+d.stats.kes).toLocaleString()}${d.stats.usd?` · $${d.stats.usd}`:""}</dd><dt>Email</dt><dd>${d.mail?'<span class="pos">ready</span>':'<span class="neg">not set up: codes can\'t be emailed yet</span>'}</dd>`;
     $("admReview").innerHTML=d.review.length?d.review.map(p=>`<div class="admrow"><div><b>$${esc(p.amount)}</b> · ${esc(pn(p.plan))}<br><small>${esc(p.payer)} · ID <b>${esc(p.receipt)}</b> · ${admWhen(p.created_at)}</small></div>
       <div class="acts"><button class="btn pri" data-adm="approve" data-id="${esc(p.checkout_id)}" type="button">Approve</button><button class="ghost" data-adm="reject" data-id="${esc(p.checkout_id)}" type="button">Reject</button></div></div>`).join(""):'<p class="mut">Nothing to check.</p>';
-    $("admRecent").innerHTML='<table><tr><th>When</th><th>Who</th><th>Plan</th><th>Amount</th><th>How</th><th>Status</th><th>Until</th></tr>'+d.recent.map(p=>`<tr><td>${admWhen(p.created_at)}</td><td>${esc(p.payer||p.phone||"")}</td><td>${esc(pn(p.plan))}${p.bonus_days?` <small>+${p.bonus_days}d</small>`:""}</td><td>${esc(p.currency)} ${(+p.amount).toLocaleString()}</td><td>${esc(p.provider)}</td><td class="${p.status==="paid"?"pos":p.status==="pending"?"":"neg"}">${esc(p.status)}</td><td>${admWhen(p.expires_at)}</td></tr>`).join("")+"</table>";
+    $("admRecent").innerHTML='<table><tr><th>When</th><th>Who</th><th>Plan</th><th>Amount</th><th>How</th><th>Status</th><th>Until</th></tr>'+d.recent.map(p=>`<tr><td>${admWhen(p.created_at)}</td><td>${esc(p.payer||p.phone||"")}</td><td>${p.kind==="ea"?"EA: "+esc(p.items||""):esc(pn(p.plan))}${p.bonus_days?` <small>+${p.bonus_days}d</small>`:""}</td><td>${esc(p.currency)} ${(+p.amount).toLocaleString()}</td><td>${esc(p.provider)}</td><td class="${p.status==="paid"?"pos":p.status==="pending"?"":"neg"}">${esc(p.status)}</td><td>${admWhen(p.expires_at)}</td></tr>`).join("")+"</table>";
     $("admGrants").innerHTML=d.grants.length?'<table><tr><th>Given</th><th>Email</th><th>Access</th><th>Until</th><th>Note</th></tr>'+d.grants.map(g=>`<tr><td>${admWhen(g.created_at)}</td><td>${esc(g.email)}</td><td>${esc(g.scope)}</td><td>${admWhen(g.until)}</td><td>${esc(g.note||"")}</td></tr>`).join("")+"</table>":'<p class="mut">None yet.</p>';
   }catch(e){$("admReview").innerHTML="";admMsg(esc(e.message),"e")}}
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-adm]");if(!b)return;const op=b.dataset.adm,id=b.dataset.id;
@@ -4001,7 +4004,9 @@ function ppReturn(){
 $("mpPay").onclick=mpPay;$("ppPay").onclick=ppPay;$("ppalSubmit").onclick=ppalSubmit;$("mpPlan").addEventListener("change",ppalLink);
 $("mpMethod").querySelectorAll("button").forEach(b=>b.onclick=()=>mpSetMethod(b.dataset.m));
 $("mpPhone").addEventListener("keydown",e=>{if(e.key==="Enter")mpPay()});
-setTimeout(()=>{accRefresh();accCheck();mpPlans().then(ppReturn)},0);
+setTimeout(()=>{accRefresh();accCheck();mpPlans().then(ppReturn);
+  if(!ON_WEB)$("navShop").href=TZ_SITE+"home/#shop";
+  if(location.hash==="#subscribe"){history.replaceState(null,"",location.pathname);payGo("mpCard")}},0);
 
 /* ================= rendering ================= */
 function refresh(){

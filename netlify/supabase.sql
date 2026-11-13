@@ -49,3 +49,8 @@ create index if not exists grants_email_idx on public.grants (email);
 alter table public.access_codes enable row level security;
 alter table public.devices enable row level security;
 alter table public.grants enable row level security;
+
+-- EA shop: orders live in payments with kind = 'ea' and items = comma-separated EA ids
+alter table public.payments add column if not exists kind text not null default 'plan';  -- plan | ea
+alter table public.payments add column if not exists items text;
+-- Then: Storage -> New bucket "eas" (PRIVATE) -> upload each EA file (e.g. tz-v1.0.zip)

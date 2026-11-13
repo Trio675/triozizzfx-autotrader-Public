@@ -1,6 +1,6 @@
 // GET ?id=<CheckoutRequestID or Pesapal OrderTrackingId>  ->  pending | paid | cancelled | failed
 import { cfg, missingDb, json, timestamp, password, token, dbGet, ppVerdict, PLANS } from "../lib/pay.mjs";
-import { settle } from "../lib/access.mjs";
+import { settle, downloadLinks } from "../lib/access.mjs";
 
 export default async (req) => {
   const c = cfg(); if (missingDb(c).length) return json({ error: "Payments aren't set up yet." }, 503);
@@ -24,6 +24,9 @@ export default async (req) => {
       if (v) row = (await settle(c, id, row, v)) || (await dbGet(c, id)) || row;
     }
     const p = PLANS[row.plan] || {};
+    if (row.kind === "ea") return json({ status: row.status === "pending" && row.provider === "paypal" ? "review" : row.status, kind: "ea",
+      desc: row.result_desc || "", receipt: row.receipt || "", amount: row.amount, currency: row.currency, provider: row.provider,
+      email: row.payer || "", downloads: row.status === "paid" ? downloadLinks(row, c.site || new URL(req.url).origin) : [] });
     return json({ status: row.status === "pending" && row.provider === "paypal" ? "review" : row.status, claimable: row.status === "paid" && !row.claimed_at, email: row.payer && row.payer.includes("@") ? row.payer : "", desc: row.result_desc || "", receipt: row.receipt || "", expires: row.expires_at || null,
       plan: p.name || row.plan, amount: row.amount, bonus: row.bonus_days || 0, provider: row.provider });
   } catch (e) { return json({ error: e.message }, 502); }
