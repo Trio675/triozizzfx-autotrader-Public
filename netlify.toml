@@ -18,3 +18,53 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+[[headers]]
+  for = "/home/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# ---------- One website ----------
+# Main site: functional-website-dba168.netlify.app  (Auto-Trader at /, home page + EA shop at /home/)
+# The old marketing sites, once linked to this repo, send every visitor to the main home page.
+[[redirects]]
+  from = "https://monumental-clafoutis-e06f36.netlify.app/*"
+  to = "https://functional-website-dba168.netlify.app/home/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://trading-tech-marketplace.netlify.app/*"
+  to = "https://functional-website-dba168.netlify.app/home/"
+  status = 301
+  force = true
+
+# Short, easy links on every site
+[[redirects]]
+  from = "/shop"
+  to = "/home/#shop"
+  status = 301
+[[redirects]]
+  from = "/eas"
+  to = "/home/#shop"
+  status = 301
+[[redirects]]
+  from = "/tools"
+  to = "/home/#tools"
+  status = 301
+[[redirects]]
+  from = "/pricing"
+  to = "/home/#autotrader"
+  status = 301
+[[redirects]]
+  from = "/app"
+  to = "/"
+  status = 301
+[[redirects]]
+  from = "/login"
+  to = "/#subscribe"
+  status = 301
+[[redirects]]
+  from = "/register"
+  to = "/home/"
+  status = 301
