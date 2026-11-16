@@ -1,5 +1,8 @@
+import { useCatalog } from "../lib/catalog.mjs";
 // POST { plan, email, phone, account }  ->  { redirect } to Pesapal's page (Airtel Money, cards, bank, M-Pesa)
 import { normEmail } from "../lib/access.mjs";
+import { alertAdmin } from "../lib/mail.mjs";
+import { sb } from "../lib/pay.mjs";
 import { priceCart } from "../lib/eas.mjs";
 import { planFor, cfg, missingPp, json, normPhone, dbInsert, ppCall, ppIpn } from "../lib/pay.mjs";
 import { randomUUID } from "node:crypto";
@@ -7,6 +10,7 @@ import { randomUUID } from "node:crypto";
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "Use POST" }, 405);
   const c = cfg(), miss = missingPp(c);
+  await useCatalog(c);
   if (miss.length) return json({ error: "Card / Airtel payments aren't set up yet. Missing: " + miss.join(", ") }, 503);
   let b; try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
   const cart = Array.isArray(b.eas) ? priceCart(b.eas) : null;
@@ -27,5 +31,5 @@ export default async (req) => {
     await dbInsert(c, { provider: "pesapal", checkout_id: d.order_tracking_id, merchant_request_id: ref, phone: phone || "", email,
       payer: email, amount: plan.kes, currency: "KES", plan: cart ? "ea" : b.plan, scope: plan.scope, kind: cart ? "ea" : "plan", items: cart ? cart.ids.join(",") : null, account: account || null, status: "pending" });
     return json({ ok: true, id: d.order_tracking_id, redirect: d.redirect_url, sandbox: !c.ppLive });
-  } catch (e) { return json({ error: e.message }, 502); }
+  } catch (e) { alertAdmin(c, sb, "Pesapal payment failed to start", e.message); return json({ error: e.message }, 502); }
 };

@@ -54,3 +54,23 @@ alter table public.grants enable row level security;
 alter table public.payments add column if not exists kind text not null default 'plan';  -- plan | ea
 alter table public.payments add column if not exists items text;
 -- Then: Storage -> New bucket "eas" (PRIVATE) -> upload each EA file (e.g. tz-v1.0.zip)
+
+-- Admin settings (prices, EA list), announcements, trade history backup, EA licences, alerts
+create table if not exists public.settings (key text primary key, value jsonb not null, updated_at timestamptz not null default now());
+create table if not exists public.announcements (
+  id bigint generated always as identity primary key, created_at timestamptz not null default now(),
+  text text not null, kind text not null default 'info', link text, active boolean not null default true, expires_at timestamptz);
+create table if not exists public.trade_history (
+  id bigint generated always as identity primary key, created_at timestamptz not null default now(),
+  email text not null, trade_id text not null, data jsonb not null, unique (email, trade_id));
+create table if not exists public.licenses (
+  id bigint generated always as identity primary key, created_at timestamptz not null default now(),
+  key text unique not null, email text not null, ea_id text not null, order_id text,
+  account text, bound_at timestamptz, last_check timestamptz, revoked_at timestamptz);
+create index if not exists licenses_email_idx on public.licenses (email);
+create table if not exists public.alerts (id bigint generated always as identity primary key, created_at timestamptz not null default now(), kind text, msg text);
+alter table public.settings enable row level security;
+alter table public.announcements enable row level security;
+alter table public.trade_history enable row level security;
+alter table public.licenses enable row level security;
+alter table public.alerts enable row level security;

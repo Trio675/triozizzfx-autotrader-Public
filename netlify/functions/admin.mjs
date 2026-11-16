@@ -2,6 +2,8 @@
 import { cfg, json, sb, dbGet, dbUpdate, PLANS } from "../lib/pay.mjs";
 import { accessMissing, deviceEmail, ADMIN_EMAIL, normEmail, settle, issueCode } from "../lib/access.mjs";
 import { mailReady } from "../lib/mail.mjs";
+import { useCatalog, saveSetting, cleanPlans, cleanEas, catalogDefaults } from "../lib/catalog.mjs";
+import { EAS } from "../lib/eas.mjs";
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "Use POST" }, 405);
@@ -9,6 +11,7 @@ export default async (req) => {
   let b; try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
   try {
     if ((await deviceEmail(c, String(b.token || ""))) !== ADMIN_EMAIL()) return json({ error: "Admins only." }, 403);
+    await useCatalog(c, true);
     switch (b.op) {
       case "list": {
         const [review, recent, grants] = await Promise.all([
@@ -39,6 +42,35 @@ export default async (req) => {
         const email = normEmail(b.email); if (!email) return json({ error: "Enter a valid email." }, 400);
         const r = await issueCode(c, email, { ttlMin: 7 * 24 * 60, why: "Here is your TRIOZIZZFX access code" });
         return json({ ok: true, sent: r.sent });
+      }
+      case "announce": {
+        const text = String(b.text || "").replace(/[<>]/g, "").trim().slice(0, 300);
+        if (!text) return json({ error: "Write the announcement first." }, 400);
+        const kind = ["info", "offer", "warning"].includes(b.kind) ? b.kind : "info", days = Math.round(+b.days) || 0;
+        const link = /^https?:\/\/[^\s"'<>]{3,200}$/.test(String(b.link || "")) ? b.link : null;
+        await sb(c, "announcements", { method: "POST", body: JSON.stringify({ text, kind, link, active: true,
+          expires_at: days > 0 ? new Date(Date.now() + days * 86400000).toISOString() : null }) });
+        return json({ ok: true });
+      }
+      case "announcements": return json({ ok: true, items: await sb(c, "announcements?select=*&order=created_at.desc&limit=30") });
+      case "unannounce": {
+        await sb(c, "announcements?id=eq." + (+b.id || 0), { method: "PATCH", body: JSON.stringify({ active: false }) });
+        return json({ ok: true });
+      }
+      case "catalog": return json({ ok: true, plans: PLANS, eas: EAS, defaults: catalogDefaults() });
+      case "saveplans": { await saveSetting(c, "plans", cleanPlans(b.plans)); await useCatalog(c, true); return json({ ok: true, plans: PLANS }); }
+      case "saveeas": {
+        const list = cleanEas(b.eas); if (!list || !list.length) return json({ error: "Add at least one EA with an id and a price." }, 400);
+        await saveSetting(c, "eas", list); await useCatalog(c, true); return json({ ok: true, eas: EAS });
+      }
+      case "licenses": {
+        const q = normEmail(b.email);
+        return json({ ok: true, items: await sb(c, "licenses?select=*" + (q ? "&email=eq." + encodeURIComponent(q) : "") + "&order=created_at.desc&limit=60") });
+      }
+      case "license_reset": case "license_revoke": {
+        const key = String(b.key || "").toUpperCase(); if (!/^TZ(-[A-Z0-9]{4}){4}$/.test(key)) return json({ error: "Bad key" }, 400);
+        await sb(c, "licenses?key=eq." + key, { method: "PATCH", body: JSON.stringify(b.op === "license_reset" ? { account: null, bound_at: null } : { revoked_at: new Date().toISOString() }) });
+        return json({ ok: true });
       }
       default: return json({ error: "Unknown op" }, 400);
     }

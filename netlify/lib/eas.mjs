@@ -24,7 +24,7 @@ export function priceCart(ids) {
   const items = uniq.map(eaById);
   if (!uniq.length) return { error: "Your cart is empty." };
   if (items.some(x => !x)) return { error: "One of the EAs in your cart doesn't exist." };
-  const off = items.filter(x => !x.file);
+  const off = items.filter(x => !x.file || x.hidden);
   if (off.length) return { error: off.map(x => x.version).join(", ") + " isn't on sale yet." };
   const pct = discountFor(items.length);
   const kes = Math.round(items.reduce((s, x) => s + x.kes, 0) * (100 - pct) / 100);

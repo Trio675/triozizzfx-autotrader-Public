@@ -27,7 +27,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(11,16,32,.92);backdrop-f
 .ghost{background:transparent;color:var(--txt);border:1px solid var(--line2)}.ghost:hover{border-color:var(--acc)}
 .cartbtn{position:relative}.cartn{background:var(--yellow);color:#111;border-radius:99px;font-size:12px;padding:1px 7px;margin-left:2px}
 #menuBtn{display:none}.links a{white-space:nowrap}
-.emb .nav .pri.top{display:none}.emb .hero{padding-top:48px}
+.emb .nav .pri.top,.emb #waFloat{display:none}.emb .hero{padding-top:48px}
 @media(max-width:1100px){.emb .links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surf);padding:14px 18px;border-bottom:1px solid var(--line)}.emb .links.open{display:flex}.emb #menuBtn{display:inline-flex;margin-left:auto}}
 @media(max-width:860px){.links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surf);padding:14px 18px;border-bottom:1px solid var(--line)}.links.open{display:flex}#menuBtn{display:inline-flex;margin-left:auto}.nav .pri.top{display:none}}
 section{padding:64px 0;border-bottom:1px solid var(--line)}
@@ -64,18 +64,26 @@ footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
 .tot{display:flex;justify-content:space-between;font-weight:800;font-size:18px;margin-top:10px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:25;background:var(--surf2);border:1px solid var(--line2);border-radius:14px;padding:10px 12px 10px 16px;display:flex;gap:12px;align-items:center;font-weight:700;box-shadow:0 12px 40px rgba(0,0,0,.45);max-width:calc(100vw - 24px)}
 #toast .btn{padding:7px 12px}
+#waFloat{position:fixed;left:16px;bottom:16px;z-index:24;width:54px;height:54px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#annBar{background:linear-gradient(90deg,rgba(46,230,176,.16),rgba(108,124,255,.2));border-bottom:1px solid var(--line2)}
+#annBar .a{max-width:1120px;margin:0 auto;padding:10px 18px;display:flex;gap:10px;align-items:center;font-weight:600;font-size:15px}
+#annBar .a.warning{color:var(--yellow)}#annBar .a b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yellow)}
+#annBar .x{margin-left:auto;background:none;border:0;color:var(--mut);cursor:pointer;font-size:16px}
+details ol li{margin:6px 0}
+.lic{font-family:ui-monospace,Consolas,monospace;background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:2px 8px;font-weight:800;letter-spacing:.04em}
 .dl a{display:block;margin:6px 0;font-weight:700}
 </style>
 </head>
 <body>
 <header><div class="wrap nav">
   <a class="brand" href="#top"><img src="logo.svg" alt="">TRIOZIZZ<b>FX</b></a>
-  <nav class="links" id="links"><a href="#autotrader">Auto-Trader</a><a href="#shop">EA Shop</a><a href="#tools">Free tools</a><a href="#learn">Learn</a><a href="#mentor">Mentorship</a><a href="#contact">Contact</a></nav>
+  <nav class="links" id="links"><a href="#autotrader">Auto-Trader</a><a href="#shop">EA Shop</a><a href="#tools">Free tools</a><a href="#learn">Learn</a><a href="#mentor">Mentorship</a><a href="#faq">Help</a><a href="#contact">Contact</a></nav>
   <button class="btn ghost cartbtn" id="cartOpen" type="button">Cart <span class="cartn" id="cartN">0</span></button>
   <a class="btn pri top" href="/">Open Auto-Trader</a>
   <button class="btn ghost" id="menuBtn" type="button" aria-label="Menu">☰</button>
 </div></header>
 
+<div id="annBar" class="hide" role="status"></div>
 <main id="top">
 <section class="hero"><div class="wrap">
   <div class="kicker">Trading technology</div>
@@ -101,7 +109,7 @@ footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
   <div class="sec-head"><div class="kicker">Auto-Trader plans</div><h2>Subscribe to the Auto-Trader</h2>
     <p>Your <b>first payment gets 5 extra days free</b>. Renewing adds days after your current plan ends. Free without a plan: the Six Step Cycle bot on demo or paper.</p></div>
   <div class="plans" id="plans"></div>
-  <p class="mut small" style="margin-top:14px">You subscribe inside the Auto-Trader (Account → Subscribe) with M-Pesa, Airtel Money, card or PayPal. Your access code is emailed to you.</p>
+  <p class="mut small" style="margin-top:14px">By subscribing you agree to the <a href="#terms" data-open="terms">Terms</a> and <a href="#privacy" data-open="privacy">Privacy Policy</a>. You subscribe inside the Auto-Trader (Account → Subscribe) with M-Pesa, Airtel Money, card or PayPal. Your access code is emailed to you.</p>
 </div></section>
 
 <section id="shop"><div class="wrap">
@@ -163,6 +171,46 @@ footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
   </div>
 </div></section>
 
+<section id="faq"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Help</div><h2>Questions and answers</h2></div>
+  <details><summary>How do I connect my Deriv account?</summary><p>Open the Auto-Trader, press <b>Connect</b> and choose <b>Log in with Deriv</b>. You sign in on Deriv's own page and come straight back. Or use your API token and app ID from the Deriv developer dashboard.</p></details>
+  <details><summary>What's free and what needs a plan?</summary><p>Free: connecting, balances, history, risk rules and the <b>Six Step Cycle</b> bot on demo or paper. Everything else (engine, all other bots, signals, markets, Strategy Lab, Auto bot, copy trading) needs a plan.</p></details>
+  <details><summary>I paid. How do I unlock the app?</summary><p>The phone or computer you paid on unlocks by itself. We also email a 6-digit access code: open the Auto-Trader → <b>Account → My access</b>, enter your email and the code. A code works once, on one device. Lost it? Tap <b>Send me a code</b>.</p></details>
+  <details><summary>Can I use my plan on two phones?</summary><p>One device at a time. Unlocking a new device signs out the old one.</p></details>
+  <details><summary>The M-Pesa prompt didn't come. What now?</summary><p>Check the number (07… or 01…), make sure your phone is on and unlocked, and wait a minute before trying again. If money left your M-Pesa but the app didn't unlock, send us the M-Pesa message on WhatsApp.</p></details>
+  <details><summary>How do I install an EA and its licence key?</summary><p>Copy the EA into MT5 → <b>File → Open Data Folder → MQL5 → Experts</b> and restart MT5. In <b>Tools → Options → Expert Advisors</b> tick <i>Allow WebRequest for listed URL</i> and add <b>https://functional-website-dba168.netlify.app</b>. Drag the EA onto a chart and paste your key into <b>LicenseKey</b>. The key works on one MT5 account.</p></details>
+  <details><summary>I changed my MT5 account. Can I move my licence?</summary><p>Yes. Message us on WhatsApp with your licence key and the new account number.</p></details>
+  <details><summary>Do you hold my money?</summary><p>No. Your money stays in your own Deriv or broker account. The Auto-Trader places trades on your account only while you run it, and you can stop it any time.</p></details>
+  <details><summary>Can I get a refund?</summary><p>Payments are non-refundable (see the Terms below). Test the free Six Step Cycle bot and the demo account first.</p></details>
+</div></section>
+
+<section id="legal"><div class="wrap">
+  <div class="sec-head"><div class="kicker">Legal</div><h2>Terms of Use and Privacy Policy</h2><p>Last updated: <span id="legalDate">16 November 2026</span></p></div>
+  <details id="terms"><summary>Terms of Use</summary>
+    <ol>
+      <li><b>Who we are.</b> TRIOZIZZFX ("we") sells trading software (the Auto-Trader, Expert Advisors and tools), guides and mentorship. We are not a broker, don't hold client money and don't give personal financial advice.</li>
+      <li><b>Risk.</b> Trading forex, CFDs, synthetic indices and options can lose you money, including all of it. Software, signals and EAs don't guarantee profit. Past results don't predict future results. You decide what to trade and you're responsible for your own trades and losses.</li>
+      <li><b>Your trading account.</b> The Auto-Trader trades the Deriv account you connect, with your permission. You can stop it any time. Keep your login, API tokens and access codes private.</li>
+      <li><b>Plans.</b> A plan gives the paid features for the time shown. Your first payment adds 5 bonus days. One device at a time. When a plan ends, the app stops placing new trades.</li>
+      <li><b>Expert Advisors.</b> Each EA purchase is a personal licence for one MT5 account. You may not share, resell, copy, reverse engineer or remove the licence check. Licences used against these terms can be cancelled.</li>
+      <li><b>Payments.</b> Prices are shown in Kenyan shillings (US dollars for PayPal). <b>All payments are non-refundable</b>, except where the law requires otherwise or a payment was charged twice by mistake.</li>
+      <li><b>Fair use.</b> Don't attack, overload or try to bypass the site, the licence system or the paywall, and don't use the service for anything illegal.</li>
+      <li><b>App fee.</b> Real-money trades placed through the TRIOZIZZFX Deriv app include Deriv's 3% app fee in the price. Affiliate links may earn us a commission at no cost to you.</li>
+      <li><b>Changes and availability.</b> We may update the software, prices and these terms. The service is provided "as is" and may sometimes be unavailable. Our liability is limited to the amount you paid us in the last 3 months.</li>
+      <li><b>Law.</b> These terms follow the laws of Kenya. Questions: <a href="mailto:triozizzy@gmail.com">triozizzy@gmail.com</a>.</li>
+    </ol></details>
+  <details id="privacy"><summary>Privacy Policy</summary>
+    <ol>
+      <li><b>What we collect.</b> Your email; your phone number when you pay by M-Pesa; your PayPal transaction ID if you pay by PayPal; payment records (amount, plan, receipt, date); a random device code that keeps your device unlocked; your Deriv account ID if you're logged in when you pay; your MT5 account number when an EA checks its licence; and, if you turn on backup, your trade history.</li>
+      <li><b>What we never collect.</b> Your M-Pesa PIN, card numbers or Deriv password. Deriv API tokens stay in your own browser (copy-trading tokens are encrypted with your PIN) and are only ever sent to Deriv.</li>
+      <li><b>Why.</b> To take payments, unlock what you paid for, send your access codes and download links, check EA licences, give support, and prevent fraud.</li>
+      <li><b>Who processes it for us.</b> Netlify (website), Supabase (database), Safaricom M-Pesa, Pesapal and PayPal (payments), Google (email sending) and Deriv (trading). We don't sell your data.</li>
+      <li><b>How long.</b> Payment records are kept as long as Kenyan tax law requires. Other data is deleted when you ask, or when it's no longer needed.</li>
+      <li><b>Your rights.</b> Under Kenya's Data Protection Act, 2019 you can ask to see, correct or delete your data, or object to its use. Email <a href="mailto:triozizzy@gmail.com">triozizzy@gmail.com</a>. You can also complain to the Office of the Data Protection Commissioner.</li>
+      <li><b>Security.</b> Data is stored encrypted by our providers, access codes are stored only as one-way hashes, and payments are confirmed directly with the payment provider.</li>
+    </ol></details>
+</div></section>
+
 <section id="contact"><div class="wrap">
   <div class="sec-head"><div class="kicker">Contact</div><h2>Talk to us</h2></div>
   <div class="grid g3 contact">
@@ -176,9 +224,11 @@ footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
 <footer><div class="wrap">
   <p><b>Risk disclosure.</b> Trading forex, CFDs, synthetic indices and options carries a high risk of losing money. Past results don't guarantee future results. Only trade money you can afford to lose. Nothing here is financial advice.</p>
   <p>TRIOZIZZFX sells trading software and education. It is not a broker and is not affiliated with Deriv, MetaQuotes or TradingView. <b>Payments are non-refundable.</b></p>
+  <p><a href="#terms" data-open="terms">Terms of Use</a> · <a href="#privacy" data-open="privacy">Privacy Policy</a> · <a href="#faq">Help</a></p>
   <p>© <span id="yr"></span> TRIOZIZZFX</p>
 </div></footer>
 
+<a id="waFloat" href="https://wa.me/254114268295?text=Hi%20TRIOZIZZFX%2C%20I%20need%20help." target="_blank" rel="noopener" aria-label="Chat with TRIOZIZZFX on WhatsApp"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#fff" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.6 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg></a>
 <div id="toast" class="hide" role="status"></div>
 <aside id="cart" class="hide" aria-label="Cart">
   <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Your EAs</h3><button class="x" id="cartClose" type="button" aria-label="Close">✕</button></div>
@@ -194,7 +244,7 @@ footer{padding:36px 0 60px;color:var(--mut);font-size:13px}
       <button class="btn ghost" id="coPalSend" type="button" style="width:100%;margin-top:10px">I've paid: send for approval</button><p class="mut small">PayPal orders are checked by hand, usually within 24 hours.</p></div>
   </div>
   <div id="coOut" class="out hide"></div>
-  <p class="mut small">Payments are non-refundable. Test on demo first.</p>
+  <p class="mut small">By paying you agree to the <a href="#terms" data-open="terms">Terms</a> and <a href="#privacy" data-open="privacy">Privacy Policy</a>. Payments are non-refundable. Test on demo first.</p>
 </aside>
 
 <script>
@@ -277,7 +327,7 @@ $("coPayP").onclick=async()=>{if(S.busy)return;const p=pre();if(!p)return;busy(t
 $("coPalSend").onclick=async()=>{if(S.busy)return;const p=pre();if(!p)return;const txn=$("coTxn").value.trim();if(!/^[A-Za-z0-9]{10,24}$/.test(txn))return out("Enter the PayPal transaction ID from your PayPal receipt.","e");
   busy(true);try{const d=await post("paypal-submit",{eas:p.ids,email:p.em,txn});out(`<b>Received.</b> We'll check your PayPal payment and email your download links once it's approved.`,"g");$("coTxn").value=""}catch(e){out(esc(e.message),"e")}busy(false)};
 function paid(d){busy(false);S.cart=[];saveCart();renderEAs();renderCart();$("cart").classList.remove("hide");
-  out(`<b>Payment received. Thank you!</b>${d.receipt?`<br>Receipt: <b>${esc(d.receipt)}</b>`:""}<div class="dl">${(d.downloads||[]).map(l=>`<a href="${esc(l.url)}">⬇ Download ${esc(l.name)}</a>`).join("")}</div><small>We also emailed these links${d.email?" to "+esc(d.email):""}. Install: MT5 → File → Open Data Folder → MQL5 → Experts.</small>`,"g")}
+  out(`<b>Payment received. Thank you!</b>${d.receipt?`<br>Receipt: <b>${esc(d.receipt)}</b>`:""}<div class="dl">${(d.downloads||[]).map(l=>{const k=(d.licenses||[]).find(x=>x.id===l.id);return `<a href="${esc(l.url)}">⬇ Download ${esc(l.name)}</a>${k?`<div class="small">Licence key: <span class="lic">${esc(k.key)}</span></div>`:""}`}).join("")}</div><small>We also emailed these links and keys${d.email?" to "+esc(d.email):""}. Install: MT5 → File → Open Data Folder → MQL5 → Experts, then paste the key into the EA's <b>LicenseKey</b> input. <a href="#faq">Full steps</a></small>`,"g")}
 function watch(id,t0,limit){clearTimeout(S.poll);S.poll=setTimeout(async()=>{let d=null;try{const r=await fetch(FN+"pay-status?id="+encodeURIComponent(id),{cache:"no-store"});d=await r.json()}catch(e){}
   if(d&&d.status==="paid")return paid(d);
   if(d&&(d.status==="failed"||d.status==="cancelled")){busy(false);return out(`${d.status==="cancelled"?"You cancelled the payment.":"The payment didn't go through."} Nothing was charged.`,"e")}
@@ -290,6 +340,17 @@ S.eas=EA_FALLBACK;renderEAs();renderCart();
 if(ON_WEB)fetch(FN+"ea-catalog",{cache:"no-store"}).then(r=>r.json()).then(d=>{S.cfg=d;if(d.eas&&d.eas.length)S.eas=d.eas;
   ["mpesa","pesapal","paypal"].forEach(m=>$("coMethod").querySelector(`[data-m="${m}"]`).classList.toggle("hide",!d[m]));
   setMethod(d[S.method]?S.method:d.mpesa?"mpesa":d.pesapal?"pesapal":"paypal");renderEAs();renderCart()}).catch(()=>{});
+
+/* ---------- legal links open their section ---------- */
+document.addEventListener("click",e=>{const a=e.target.closest("[data-open]");if(!a)return;const d=$(a.dataset.open);if(d){d.open=true;e.preventDefault();d.scrollIntoView({behavior:"smooth",block:"start"})}});
+(()=>{const id=(window.TZ_ANCHOR||location.hash.slice(1)||"");const el=id&&$(id);if(!el)return;if(el.tagName==="DETAILS")el.open=true;setTimeout(()=>el.scrollIntoView({block:"start"}),60)})();
+/* ---------- announcements from the admin ---------- */
+if(ON_WEB)fetch(FN+"announce",{cache:"no-store"}).then(r=>r.json()).then(d=>{let hid=[];try{hid=JSON.parse(localStorage.getItem("tz_ann_hide")||"[]")}catch(e){}
+  const items=(d.items||[]).filter(i=>!hid.includes(i.id));if(!items.length)return;const bar=$("annBar");
+  bar.innerHTML=items.map(i=>`<div class="a ${esc(i.kind)}"><b>${i.kind==="offer"?"Offer":i.kind==="warning"?"Notice":"News"}</b><span>${esc(i.text)}</span>${i.link?` <a href="${esc(i.link)}" target="_blank" rel="noopener">Learn more</a>`:""}<button class="x" data-ann="${+i.id}" type="button" aria-label="Hide">✕</button></div>`).join("");
+  bar.classList.remove("hide")}).catch(()=>{});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-ann]");if(!b)return;let hid=[];try{hid=JSON.parse(localStorage.getItem("tz_ann_hide")||"[]")}catch(err){}
+  hid.push(+b.dataset.ann);try{localStorage.setItem("tz_ann_hide",JSON.stringify(hid.slice(-50)))}catch(err){}b.closest(".a").remove();if(!$("annBar").children.length)$("annBar").classList.add("hide")});
 
 /* ---------- calculators ---------- */
 const v=id=>parseFloat($(id).value),ok=x=>isFinite(x)&&x>0,f2=x=>(+x).toLocaleString(undefined,{maximumFractionDigits:2});

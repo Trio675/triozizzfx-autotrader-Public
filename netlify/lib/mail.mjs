@@ -35,3 +35,17 @@ export function codeEmail(code, { plan, expires, why }) {
 ${plan ? `<p>Plan: <b>${plan}</b>${expires ? `<br>Active until: <b>${new Date(expires).toUTCString()}</b>` : ""}</p>` : ""}`);
 }
 export const plainEmail = (html) => wrap(html);
+
+/** Emails the admin when something breaks (at most once per 30 minutes per kind). */
+export async function alertAdmin(c, sbFn, kind, msg) {
+  try {
+    const admin = (process.env.ADMIN_EMAIL || "dennisombachi234@gmail.com").trim();
+    if (!mailReady() || !c.sbUrl) return;
+    const since = encodeURIComponent(new Date(Date.now() - 30 * 60000).toISOString());
+    const recent = await sbFn(c, "alerts?select=id&kind=eq." + encodeURIComponent(kind) + "&created_at=gte." + since);
+    await sbFn(c, "alerts", { method: "POST", body: JSON.stringify({ kind, msg: String(msg).slice(0, 500) }) });
+    if (recent && recent.length) return;
+    await sendMail(admin, "TRIOZIZZFX alert: " + kind, wrap(`<p><b>${kind}</b></p><p>${String(msg).replace(/</g, "&lt;").slice(0, 500)}</p>
+<p>More of the same in the next 30 minutes won't be emailed. Check Netlify → Logs → Functions.</p>`));
+  } catch (e) { console.error("alertAdmin", e.message); }
+}

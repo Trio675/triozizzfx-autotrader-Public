@@ -1,3 +1,4 @@
+import { useCatalog } from "../lib/catalog.mjs";
 // POST { plan, email, txn } -> records a PayPal payment for the admin to check and approve
 import { cfg, json, planFor, dbInsert } from "../lib/pay.mjs";
 import { accessMissing, normEmail, ADMIN_EMAIL } from "../lib/access.mjs";
@@ -7,6 +8,7 @@ import { priceCart } from "../lib/eas.mjs";
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "Use POST" }, 405);
   const c = cfg(); if (accessMissing(c).length) return json({ error: "PayPal payments aren't set up yet." }, 503);
+  await useCatalog(c);
   let b; try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
   const cart = Array.isArray(b.eas) ? priceCart(b.eas) : null;
   if (cart && cart.error) return json({ error: cart.error }, 400);

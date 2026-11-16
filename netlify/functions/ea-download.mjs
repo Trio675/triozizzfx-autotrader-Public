@@ -1,3 +1,4 @@
+import { useCatalog } from "../lib/catalog.mjs";
 // GET ?o=<order>&i=<ea id>&s=<signature> -> short-lived link to the EA file in private Supabase Storage
 import { cfg, json, dbGet } from "../lib/pay.mjs";
 import { dlSig, accessMissing } from "../lib/access.mjs";
@@ -6,6 +7,7 @@ const page = (msg, code) => new Response(`<!doctype html><meta name="viewport" c
   { status: code, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 export default async (req) => {
   const c = cfg(); if (accessMissing(c).length) return page("Downloads aren't set up yet.", 503);
+  await useCatalog(c);
   const q = new URL(req.url).searchParams, o = q.get("o") || "", i = q.get("i") || "", s = q.get("s") || "";
   if (!o || !i || s !== dlSig(o, i)) return page("This download link isn't valid. Use the link from your purchase email.", 403);
   try {

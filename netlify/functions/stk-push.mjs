@@ -1,11 +1,15 @@
+import { useCatalog } from "../lib/catalog.mjs";
 // POST { phone, plan, account }  ->  sends the M-Pesa PIN prompt to the phone
 import { normEmail } from "../lib/access.mjs";
+import { alertAdmin } from "../lib/mail.mjs";
+import { sb } from "../lib/pay.mjs";
 import { priceCart } from "../lib/eas.mjs";
 import { planFor, cfg, missing, json, normPhone, timestamp, password, token, dbInsert, dbRecentForPhone } from "../lib/pay.mjs";
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "Use POST" }, 405);
   const c = cfg(), miss = missing(c);
+  await useCatalog(c);
   if (miss.length) return json({ error: "M-Pesa payments aren't set up yet. Missing: " + miss.join(", ") }, 503);
   let b; try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
   const cart = Array.isArray(b.eas) ? priceCart(b.eas) : null;
@@ -33,11 +37,14 @@ export default async (req) => {
     const r = await fetch(c.base + "/mpesa/stkpush/v1/processrequest", {
       method: "POST", headers: { Authorization: "Bearer " + (await token(c)), "Content-Type": "application/json" }, body: JSON.stringify(body) });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || String(d.ResponseCode) !== "0")
-      return json({ error: "M-Pesa didn't send the prompt: " + (d.errorMessage || d.ResponseDescription || d.CustomerMessage || r.status) }, 502);
+    if (!r.ok || String(d.ResponseCode) !== "0") {
+      const why = d.errorMessage || d.ResponseDescription || d.CustomerMessage || r.status;
+      if (r.status >= 500 || r.status === 401 || /credential|invalid access|merchant|shortcode|passkey/i.test(String(why))) alertAdmin(c, sb, "M-Pesa is refusing prompts", String(why));
+      return json({ error: "M-Pesa didn't send the prompt: " + why }, 502);
+    }
     await dbInsert(c, { provider: "mpesa", checkout_id: d.CheckoutRequestID, merchant_request_id: d.MerchantRequestID, phone, email, payer: email,
       amount: plan.kes, currency: "KES", plan: cart ? "ea" : b.plan, scope: plan.scope, kind: cart ? "ea" : "plan", items: cart ? cart.ids.join(",") : null,
       account: account || null, status: "pending" });
     return json({ ok: true, id: d.CheckoutRequestID, amount: plan.kes, plan: plan.name, sandbox: !c.live });
-  } catch (e) { return json({ error: e.message }, 502); }
+  } catch (e) { alertAdmin(c, sb, "M-Pesa payment failed to start", e.message); return json({ error: e.message }, 502); }
 };

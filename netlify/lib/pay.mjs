@@ -14,7 +14,7 @@ export const PLANS = {
   a1m: { name: "Binary + Forex · 1 month", scope: "both",   usd: 30, kes: 3900, days: 30 },
   test:{ name: "Test payment",             scope: "binary", usd: 0,  kes: 1,    days: 1, sandboxOnly: true },
 };
-export const planFor = (id, sandbox) => { const p = PLANS[id]; return p && (!p.sandboxOnly || sandbox) ? p : null; };
+export const planFor = (id, sandbox) => { const p = PLANS[id]; return p && !p.hidden && (!p.sandboxOnly || sandbox) ? p : null; };
 
 export const cfg = () => {
   const live = env("MPESA_ENV", "sandbox") === "production";

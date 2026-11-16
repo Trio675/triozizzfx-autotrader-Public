@@ -88,8 +88,12 @@ export async function settle(c, id, row, verdict) {
   const upd = await dbUpdate(c, id, await finalize(c, row, verdict));
   if (upd && upd.status === "paid" && upd.kind === "ea" && upd.payer && upd.payer.includes("@")) {
     const site = (c.site || "").replace(/\/$/, ""), links = downloadLinks(upd, site);
+    let keys = []; try { keys = await issueLicenses(c, upd); } catch (e) { console.error("licenses", e.message); }
+    const keyOf = id => (keys.find(k => k.id === id) || {}).key || "";
     await sendMail(upd.payer, "Your TRIOZIZZFX Expert Advisors", plainEmail(`<p>Thank you for your purchase. Download your EAs here:</p><ul>${
-      links.map(l => `<li><a href="${l.url}">${l.name}</a></li>`).join("")}</ul>
+      links.map(l => `<li><a href="${l.url}">${l.name}</a>${keyOf(l.id) ? `<br>Licence key: <b style="font-size:16px">${keyOf(l.id)}</b>` : ""}</li>`).join("")}</ul>
+<p><b>Licence keys:</b> paste the key into the EA's <i>LicenseKey</i> input. Each key works on <b>one MT5 account</b>: the first account you use it on. To move it to another account, contact TRIOZIZZFX support.</p>
+<p>In MT5 allow the licence check once: Tools → Options → Expert Advisors → tick "Allow WebRequest for listed URL" and add <b>${site}</b>.</p>
 <p>These links keep working: save this email. Install: copy the file into MetaTrader 5 → File → Open Data Folder → MQL5 → Experts, then restart MT5.</p>
 <p>Always test an EA on a demo account first.</p>`)).catch(e => console.error("ea email", e.message));
     return upd;
@@ -99,4 +103,23 @@ export async function settle(c, id, row, verdict) {
       plan: (PLANS[upd.plan] || {}).name, expires: upd.expires_at }).catch(e => console.error("code email", e.message));
   }
   return upd;
+}
+
+/* ---- EA licences: one key per EA bought; it binds to the first MT5 account that uses it ---- */
+export function newLicenseKey() {
+  const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", b = randomBytes(16);
+  let s = ""; for (let i = 0; i < 16; i++) s += A[b[i] % A.length];
+  return "TZ-" + s.match(/.{4}/g).join("-");
+}
+export async function issueLicenses(c, row) {
+  const ids = String(row.items || "").split(",").filter(Boolean), out = [];
+  const have = await sb(c, "licenses?select=key,ea_id&order_id=eq." + encodeURIComponent(row.checkout_id));
+  for (const id of ids) {
+    const old = (have || []).find(h => h.ea_id === id);
+    if (old) { out.push({ id, key: old.key }); continue; }
+    const key = newLicenseKey();
+    await sb(c, "licenses", { method: "POST", body: JSON.stringify({ key, email: row.payer, ea_id: id, order_id: row.checkout_id }) });
+    out.push({ id, key });
+  }
+  return out;
 }
