@@ -23,7 +23,7 @@
 
 ## 6. First run
 - [ ] Open the site → Account → My access → admin email → Send me a code → Unlock → Admin page appears
-- [ ] Admin → Plan prices: hide the Forex plans until the forex tools are ready
+- [ ] (Everything is free now: plans and payment keys are optional)
 - [ ] Admin → Announcements: post a welcome message
 - [ ] Share the tester code (`TESTER_CODE`) with the group
 
