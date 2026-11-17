@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://functional-website-dba168.netlify.app/sitemap.xml
+Sitemap: https://triozizzfx-trader.netlify.app/sitemap.xml

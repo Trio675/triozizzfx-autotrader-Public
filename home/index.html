@@ -7,10 +7,10 @@
 <meta name="description" content="TRIOZIZZFX: a free Auto-Trader for Deriv, free MetaTrader 5 Expert Advisors, trading calculators, guides and mentorship.">
 <meta property="og:title" content="TRIOZIZZFX — Auto-Trader, Expert Advisors & Trading Tools">
 <meta property="og:description" content="Deriv Auto-Trader, MT5 Expert Advisors, free calculators and mentorship.">
-<link rel="canonical" href="https://functional-website-dba168.netlify.app/home/">
+<link rel="canonical" href="https://triozizzfx-trader.netlify.app/home/">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo.png">
-<meta property="og:image" content="https://functional-website-dba168.netlify.app/home/logo-full.png">
+<meta property="og:image" content="https://triozizzfx-trader.netlify.app/home/logo-full.png">
 <style>
 :root{--bg:#0b1020;--surf:#121a2e;--surf2:#172137;--line:#233049;--line2:#2c3b5a;--txt:#e8ecf6;--mut:#8b96b3;--acc:#6c7cff;--acc2:#8b98ff;--green:#2fbf71;--red:#ef4f5f;--yellow:#f2c94c}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
@@ -287,7 +287,7 @@ function renderEAs(){
     <div class="ver">${esc(e.version)}${e.available?"":'<span class="soon">COMING SOON</span>'}</div><h3>${esc(e.name)}</h3>
     <dl><dt>Platform</dt><dd>${esc(e.platform)}</dd><dt>Trades</dt><dd>${esc(e.trades)}</dd><dt>How</dt><dd>${esc(e.how)}</dd></dl>
     <div class="foot"><span class="price">Free</span>${e.available
-      ?(ON_WEB?`<a class="btn pri" href="${FN}ea-free?i=${encodeURIComponent(e.id)}">⬇ Download free</a>`:`<a class="btn pri" href="https://functional-website-dba168.netlify.app/home/#shop" target="_blank" rel="noopener">Download on the website</a>`)
+      ?(ON_WEB?`<a class="btn pri" href="${FN}ea-free?i=${encodeURIComponent(e.id)}">⬇ Download free</a>`:`<a class="btn pri" href="https://triozizzfx-trader.netlify.app/home/#shop" target="_blank" rel="noopener">Download on the website</a>`)
       :`<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/254114268295?text=${encodeURIComponent("Hi TRIOZIZZFX, tell me when "+e.version+" "+e.name+" is ready.")}">Notify me</a>`}</div></div>`}).join("")}
 function cartTotals(){const items=S.cart.map(id=>S.eas.find(e=>e.id===id)).filter(e=>e&&e.available),pct=pctFor(items.length),
   k=items.reduce((s,e)=>s+e.kes,0),u=items.reduce((s,e)=>s+e.usd,0);

@@ -2,7 +2,7 @@
 
 A browser app for trading Deriv synthetic indices with live data, clear rules and honest statistics.
 
-**Live site:** https://functional-website-dba168.netlify.app
+**Live site:** https://triozizzfx-trader.netlify.app
 
 ## What's inside
 

@@ -17,7 +17,7 @@ New organization -> New project -> SQL Editor -> paste `netlify/supabase.sql` ->
 Project Settings -> API: copy the Project URL and the `service_role` key.
 
 ## 2. Netlify environment variables (Site configuration -> Environment variables)
-Common: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SITE_URL` = https://functional-website-dba168.netlify.app
+Common: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SITE_URL` = https://triozizzfx-trader.netlify.app
 
 M-Pesa (Daraja):
 | Name | Sandbox | Live |

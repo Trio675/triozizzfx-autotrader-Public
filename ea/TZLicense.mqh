@@ -12,8 +12,8 @@
 #ifndef TZ_LICENSE_MQH
 #define TZ_LICENSE_MQH
 
-#define TZ_LICENSE_HOST "https://functional-website-dba168.netlify.app"
-#define TZ_LICENSE_URL  "https://functional-website-dba168.netlify.app/.netlify/functions/license"
+#define TZ_LICENSE_HOST "https://triozizzfx-trader.netlify.app"
+#define TZ_LICENSE_URL  "https://triozizzfx-trader.netlify.app/.netlify/functions/license"
 #define TZ_RECHECK_SECS 21600     // re-check every 6 hours
 #define TZ_GRACE_SECS   86400     // keep trading up to 24 h if the server can't be reached
 

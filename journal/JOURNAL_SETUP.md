@@ -10,8 +10,8 @@ and Storage shows a private bucket `screenshots`.
 
 ## 2. Website addresses
 Authentication → URL Configuration
-- Site URL: `https://functional-website-dba168.netlify.app/journal/`
-- Redirect URLs → Add: `https://functional-website-dba168.netlify.app/journal/` and `https://publish-online-883449.netlify.app/journal/`
+- Site URL: `https://triozizzfx-trader.netlify.app/journal/`
+- Redirect URLs → Add: `https://triozizzfx-trader.netlify.app/journal/` and `https://triozizzfx-trader.netlify.app/journal/`
 
 ## 3. Send emails from your Gmail (required: Supabase's own sender only emails your team, 2 per hour)
 Google Account → Security → 2-Step Verification ON → "App passwords" → create "Triozizz Journal" → copy the 16 letters.

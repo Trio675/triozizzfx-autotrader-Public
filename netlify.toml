@@ -25,17 +25,30 @@
     Cache-Control = "no-cache"
 
 # ---------- One website ----------
-# Main site: functional-website-dba168.netlify.app  (Auto-Trader at /, home page + EA shop at /home/)
+# Main site: triozizzfx-trader.netlify.app  (Auto-Trader at /, home page + EA shop at /home/)
 # The old marketing sites, once linked to this repo, send every visitor to the main home page.
 [[redirects]]
   from = "https://monumental-clafoutis-e06f36.netlify.app/*"
-  to = "https://functional-website-dba168.netlify.app/home/"
+  to = "https://triozizzfx-trader.netlify.app/home/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://trading-tech-marketplace.netlify.app/*"
-  to = "https://functional-website-dba168.netlify.app/home/"
+  to = "https://triozizzfx-trader.netlify.app/home/"
+  status = 301
+  force = true
+
+# Older copies of the app (Netlify teams whose deploys stopped) send visitors here once they publish again
+[[redirects]]
+  from = "https://functional-website-dba168.netlify.app/*"
+  to = "https://triozizzfx-trader.netlify.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://publish-online-883449.netlify.app/*"
+  to = "https://triozizzfx-trader.netlify.app/:splat"
   status = 301
   force = true
 
