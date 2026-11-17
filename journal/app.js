@@ -242,7 +242,7 @@ F("gatebox").addEventListener("click",async e=>{
       let top=null;try{top=window.top.location;void top.href}catch(_){top=null}
       (top||location).href=data.url;
     }
-    else if(a==="resend"){b.disabled=true;await sendOtp(G.target,G.otpType,G.purpose,G.purpose==="signup");toast("New code sent")}
+    else if(a==="resend"){b.disabled=true;if(G.purpose==="confirm"){const r=await sb.auth.resend({type:"signup",email:G.target});if(r.error)throw r.error}else await sendOtp(G.target,G.otpType,G.purpose,G.purpose==="signup");toast("New code sent")}
     else if(a==="signout"){await signOut()}
     else if(a==="forgot-pin")gate("forgot-pin");
     else if(a==="to-unlock")gate("pin-unlock");
@@ -267,15 +267,15 @@ F("gatebox").addEventListener("submit",async e=>{
         busy(true,"Creating account…");
         const {data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{display_name:G.name},emailRedirectTo:location.origin+location.pathname}});
         if(error)throw error;
-        if(data.session){await afterAuth(true)}else{G.target=em;gate("check-email")}
+        if(data.session){await afterAuth(true)}else{G.target=em;G.otpType="email";G.purpose="confirm";gate("code","","Account created. Enter the code we emailed you to confirm it.")}
       }else{
-        busy(true,"Signing in…");const {error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error;await afterAuth(true);
+        busy(true,"Signing in…");const {error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error){if(/Email not confirmed/i.test(error.message||"")){const r=await sb.auth.resend({type:"signup",email:em});if(r.error)throw r.error;G.target=em;G.otpType="email";G.purpose="confirm";return gate("code","","Your email isn't confirmed yet. Enter the code we just emailed you.")}throw error}await afterAuth(true);
       }
     }
     else if(st==="code"){
       const code=v("gCode").replace(/\s/g,"");if(!/^\d{6,10}$/.test(code))return gErr("Enter the code from the message.");
       busy(true,"Checking…");
-      const {error}=G.otpType==="sms"?await sb.auth.verifyOtp({phone:G.target,token:code,type:"sms"}):await sb.auth.verifyOtp({email:G.target,token:code,type:"email"});
+      const {error}=G.otpType==="sms"?await sb.auth.verifyOtp({phone:G.target,token:code,type:"sms"}):await sb.auth.verifyOtp({email:G.target,token:code,type:G.purpose==="confirm"?"signup":"email"});
       if(error)throw error;
       if(G.purpose==="pin"){await loadSessionUser();gate("pin-reset")}else await afterAuth(true);
     }
