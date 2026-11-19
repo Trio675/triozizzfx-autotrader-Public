@@ -22,8 +22,10 @@
     <div class="brand"><img src="icons/logo.svg" alt="" width="36" height="36"><span>TRIOZIZZ<small>Journal</small></span></div>
     <label class="acctsel"><span>Account</span><select class="input" id="acctFilter" aria-label="Trading account"></select></label>
     <button class="tab" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Dashboard</span></button>
+    <button class="tab desk" data-view="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Sessions</span></button>
     <button class="tab" data-view="returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V14M9 20V8M14 20V11M19 20V4"/></svg><span>Returns</span></button>
     <button class="tab" data-view="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Calendar</span></button>
+    <button class="tab desk" data-view="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Notes</span></button>
     <button class="tab" data-view="trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Trades</span></button>
     <button class="tab" data-view="tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg><span>Calculators</span></button>
     <button class="tab desk" data-view="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span>Plan</span></button>
@@ -39,8 +41,11 @@
 <div class="sheet" id="sheet" hidden>
   <div class="sheetbox" role="menu">
     <div class="acctsel"><span>Account</span><select class="input" id="acctFilterM" aria-label="Trading account"></select></div>
+    <button class="sheetitem" data-go="sessions">Market sessions</button>
+    <button class="sheetitem" data-go="notes">Daily notes</button>
     <button class="sheetitem" data-go="plan">Plan &amp; weekly review</button>
     <button class="sheetitem" data-go="setup">Setup, security &amp; backup</button>
+    <button class="sheetitem" data-act="backup">Download a backup</button>
     <button class="sheetitem" data-act="lock">Lock journal</button>
     <button class="sheetitem" data-act="close-sheet">Close</button>
   </div>
@@ -48,7 +53,7 @@
 <button class="fab" id="fab" aria-label="Log a trade" hidden>+</button>
 
 <div class="overlay" id="ov" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-  <form class="modal" id="tradeForm" novalidate>
+  <form class="modal" id="tradeForm" novalidate autocomplete="off">
     <div class="mh"><h2 id="mTitle">Log trade</h2><button type="button" class="btn ghost sm" id="mClose">Close</button></div>
     <div class="form">
       <div class="f"><label for="fDate">Date</label><input class="input" type="date" id="fDate" required></div>
@@ -59,7 +64,7 @@
       <div class="f"><label for="fAcct">Trading account</label><select class="input" id="fAcct"></select></div>
       <div class="f"><label for="fSrc">Taken by</label><select class="input" id="fSrc"></select></div>
       <div class="f"><label for="fSetup">Setup</label><input class="input" id="fSetup" list="setupList" placeholder="Trend pullback" autocomplete="off"></div>
-      <div class="f"><label for="fSession">Session</label><select class="input" id="fSession"><option>Asian</option><option>London</option><option>New York</option><option>London/NY overlap</option><option>24/7 (synthetic)</option></select></div>
+      <div class="f"><label for="fSession">Session</label><select class="input" id="fSession"></select></div>
       <div class="f"><label for="fEntry">Entry</label><input class="input num" id="fEntry" inputmode="decimal"></div>
       <div class="f"><label for="fSL">Stop loss</label><input class="input num" id="fSL" inputmode="decimal"></div>
       <div class="f"><label for="fTP">Take profit</label><input class="input num" id="fTP" inputmode="decimal"></div>
@@ -69,8 +74,10 @@
       <div class="f"><label for="fPnl" id="fPnlL">Net P&amp;L</label><input class="input num" id="fPnl" inputmode="decimal" placeholder="-1.00 or 2.40" required></div>
       <div class="f"><label for="fGrade">Setup grade</label><select class="input" id="fGrade"><option>A</option><option selected>B</option><option>C</option></select></div>
       <div class="f full preview" id="fPreview"></div>
+      <div class="f full autopnl" id="fAuto" hidden></div>
       <div class="f"><label for="fEmo">Mindset</label><select class="input" id="fEmo"><option>Calm</option><option>Confident</option><option>Hesitant</option><option>FOMO</option><option>Revenge</option><option>Tired</option></select></div>
       <div class="f"><label for="fPlan">Followed my plan?</label><select class="input" id="fPlan"><option value="1">Yes</option><option value="0">No</option></select></div>
+      <div class="f full" id="fCheckW"><label>Checklist: tick each rule you followed on this trade</label><div class="checklist" id="fCheck"></div></div>
       <div class="f full"><label>Mistakes</label><div class="chips" id="fMistakes"></div></div>
       <div class="f full"><label for="fNotes">Notes: why I entered, how I managed it, lesson</label><textarea class="input" id="fNotes"></textarea></div>
       <div class="f full"><label for="fShot">Chart screenshot</label>
